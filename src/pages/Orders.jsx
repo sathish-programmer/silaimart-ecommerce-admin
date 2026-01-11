@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EyeIcon, CheckCircleIcon, TruckIcon, XCircleIcon, ClockIcon, CreditCardIcon, BanknotesIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { apiCall } from '../utils/api';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -21,9 +22,7 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/admin/orders', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-      });
+      const response = await apiCall('/admin/orders');
       const data = await response.json();
       setOrders(data.orders || []);
     } catch (error) {
@@ -40,12 +39,8 @@ const Orders = () => {
       if (paymentStatus) updateData.paymentStatus = paymentStatus;
       if (notes) updateData.notes = notes;
       
-      await fetch(`/api/admin/orders/${orderId}/status`, {
+      await apiCall(`/admin/orders/${orderId}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        },
         body: JSON.stringify(updateData)
       });
       toast.success('Order updated successfully');
@@ -96,9 +91,7 @@ const Orders = () => {
 
   const viewOrderDetails = async (orderId) => {
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
-      });
+      const response = await apiCall(`/admin/orders/${orderId}`);
       const data = await response.json();
       setSelectedOrder(data.order);
       setShowModal(true);

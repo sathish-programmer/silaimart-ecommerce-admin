@@ -3,6 +3,8 @@ import { StarIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/o
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,12 +26,13 @@ const Reviews = () => {
     try {
       const token = localStorage.getItem('admin_token');
       const statusParam = filter !== 'all' ? `?status=${filter}` : '';
-      const response = await fetch(`http://localhost:5001/api/reviews/admin${statusParam}`, {
+      const response = await fetch(`${API_URL}/reviews/admin${statusParam}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       const data = await response.json();
+
       setReviews(data.reviews);
     } catch (error) {
       toast.error('Failed to fetch reviews');
@@ -41,7 +44,7 @@ const Reviews = () => {
   const updateReviewStatus = async (reviewId, isApproved, response = '') => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`http://localhost:5001/api/reviews/admin/${reviewId}`, {
+      const res = await fetch(`${API_URL}/reviews/admin/${reviewId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +69,7 @@ const Reviews = () => {
 
     try {
       const token = localStorage.getItem('admin_token');
-      const response = await fetch(`http://localhost:5001/api/reviews/admin/${reviewId}`, {
+      const response = await fetch(`${API_URL}/reviews/admin/${reviewId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -96,7 +99,7 @@ const Reviews = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('admin_token');
-      const response = await fetch(`http://localhost:5001/api/reviews/admin/${selectedReview._id}`, {
+      const response = await fetch(`${API_URL}/reviews/admin/${selectedReview._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

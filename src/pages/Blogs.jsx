@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import RichTextEditor from '../components/RichTextEditor';
@@ -17,7 +17,7 @@ const Blogs = () => {
     excerpt: '',
     tags: '',
     isPublished: false,
-    featuredImage: ''
+    featuredImage: { url: '', alt: '' }
   });
 
   useEffect(() => {
@@ -69,6 +69,23 @@ const Blogs = () => {
     }
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: {
+            url: e.target.result,
+            alt: file.name
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       title: '',
@@ -76,7 +93,7 @@ const Blogs = () => {
       excerpt: '',
       tags: '',
       isPublished: false,
-      featuredImage: ''
+      featuredImage: { url: '', alt: '' }
     });
     setEditBlog(null);
   };
@@ -86,7 +103,8 @@ const Blogs = () => {
       setEditBlog(blog);
       setFormData({
         ...blog,
-        tags: blog.tags?.join(', ') || ''
+        tags: blog.tags?.join(', ') || '',
+        featuredImage: blog.featuredImage || { url: '', alt: '' }
       });
     } else {
       resetForm();
@@ -234,14 +252,40 @@ const Blogs = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Featured Image URL</label>
-                  <input
-                    type="url"
-                    value={formData.featuredImage}
-                    onChange={(e) => setFormData({...formData, featuredImage: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <label className="block text-white mb-2">Featured Image</label>
+                  <div className="border-2 border-dashed border-gray-700 rounded-lg p-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="blog-image-upload"
+                    />
+                    <label
+                      htmlFor="blog-image-upload"
+                      className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-800 rounded-lg p-4 transition-colors"
+                    >
+                      <PhotoIcon className="h-8 w-8 text-gray-400 mb-2" />
+                      <span className="text-gray-400">Click to upload featured image</span>
+                      <span className="text-gray-500 text-sm mt-1">PNG, JPG, WEBP up to 10MB</span>
+                    </label>
+                  </div>
+                  {formData.featuredImage?.url && (
+                    <div className="mt-4 relative">
+                      <img 
+                        src={formData.featuredImage.url} 
+                        alt={formData.featuredImage.alt || 'Preview'} 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, featuredImage: { url: '', alt: '' } }))}
+                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:bg-red-700"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>

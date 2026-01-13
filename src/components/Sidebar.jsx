@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -9,11 +10,14 @@ import {
   ChatBubbleLeftRightIcon,
   CogIcon,
   ScaleIcon,
-  StarIcon
+  StarIcon,
+  RectangleStackIcon
 } from '@heroicons/react/24/outline';
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
@@ -23,10 +27,12 @@ const Sidebar = () => {
     { name: 'Reviews', href: '/reviews', icon: StarIcon },
     { name: 'Blogs', href: '/blogs', icon: DocumentTextIcon },
     { name: 'Coupons', href: '/coupons', icon: TicketIcon },
-    { name: 'Banners', href: '/banners', icon: DocumentTextIcon },
-    { name: 'Policies', href: '/policies', icon: ScaleIcon },
-    { name: 'AI Chatbot', href: '/chatbot', icon: ChatBubbleLeftRightIcon },
-    { name: 'Settings', href: '/settings', icon: CogIcon },
+    { name: 'Banners', href: '/banners', icon: RectangleStackIcon },
+    ...(isSuperAdmin ? [
+      { name: 'Policies', href: '/policies', icon: ScaleIcon },
+      { name: 'AI Chatbot', href: '/chatbot', icon: ChatBubbleLeftRightIcon },
+      { name: 'Settings', href: '/settings', icon: CogIcon },
+    ] : [])
   ];
 
   return (
@@ -34,9 +40,11 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6 border-b border-gray-800">
         <Link to="/" className="flex items-center">
-          {/* <img src="/silaimartlogo.png" alt="SilaiMart" className="h-12 w-auto mr-3" /> */}
-          <span className="text-xl font-bold text-bronze">Admin</span>
+          <span className="text-xl font-bold text-bronze">
+            {isSuperAdmin ? 'Super Admin' : 'Admin'}
+          </span>
         </Link>
+        <p className="text-xs text-gray-400 mt-1">{user?.name}</p>
       </div>
 
       {/* Navigation */}

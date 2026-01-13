@@ -33,17 +33,19 @@ const Orders = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId, orderStatus, paymentStatus = null, notes = null) => {
+  const updateOrderStatus = async (orderId, orderStatus, paymentStatus = null, notes = null, estimatedDeliveryDate = null, deliveryNotes = null, sendEmail = false) => {
     try {
-      const updateData = { orderStatus };
+      const updateData = { orderStatus, sendEmail };
       if (paymentStatus) updateData.paymentStatus = paymentStatus;
       if (notes) updateData.notes = notes;
+      if (estimatedDeliveryDate) updateData.estimatedDeliveryDate = estimatedDeliveryDate;
+      if (deliveryNotes !== null) updateData.deliveryNotes = deliveryNotes;
       
       await apiCall(`/admin/orders/${orderId}/status`, {
         method: 'PUT',
         body: JSON.stringify(updateData)
       });
-      toast.success('Order updated successfully');
+      toast.success(sendEmail ? 'Order updated and email sent!' : 'Order updated successfully');
       fetchOrders();
     } catch (error) {
       console.error('Error updating order:', error);
@@ -279,8 +281,14 @@ const Orders = () => {
                           if (newStatus === 'cancelled') {
                             setShowCancelModal(true);
                           } else {
-                            updateOrderStatus(selectedOrder._id, newStatus);
-                            setSelectedOrder({...selectedOrder, orderStatus: newStatus});
+                            // Auto-set delivery date based on status
+                            let deliveryDate = selectedOrder.estimatedDeliveryDate;
+                            if (newStatus === 'shipped' && !deliveryDate) {
+                              const date = new Date();
+                              date.setDate(date.getDate() + 7); // 7 days from now
+                              deliveryDate = date.toISOString().split('T')[0];
+                            }
+                            setSelectedOrder({...selectedOrder, orderStatus: newStatus, estimatedDeliveryDate: deliveryDate});
                           }
                         }}
                         className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-bronze focus:outline-none"
@@ -292,6 +300,24 @@ const Orders = () => {
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
+                      <div className="flex space-x-2 mt-2">
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, false);
+                          }}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                        >
+                          Update Status
+                        </button>
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, true);
+                          }}
+                          className="px-4 py-2 bg-bronze text-black rounded-lg hover:bg-gold transition-colors text-sm font-medium"
+                        >
+                          Update & Email Customer
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-gray-400 text-sm mb-1">Payment Status</label>
@@ -303,7 +329,6 @@ const Orders = () => {
                             setPaymentAction(newPaymentStatus);
                             setShowPaymentModal(true);
                           } else {
-                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, newPaymentStatus);
                             setSelectedOrder({...selectedOrder, paymentStatus: newPaymentStatus});
                           }
                         }}
@@ -314,6 +339,24 @@ const Orders = () => {
                         <option value="failed">Failed</option>
                         <option value="refunded">Refunded</option>
                       </select>
+                      <div className="flex space-x-2 mt-2">
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, false);
+                          }}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                        >
+                          Update Payment
+                        </button>
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, true);
+                          }}
+                          className="px-4 py-2 bg-bronze text-black rounded-lg hover:bg-gold transition-colors text-sm font-medium"
+                        >
+                          Update & Email Customer
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-gray-400 text-sm mb-1">Order Notes</label>
@@ -323,6 +366,50 @@ const Orders = () => {
                         placeholder="Notes will appear here when added"
                         className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-300 h-20 resize-none cursor-not-allowed"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-1">Estimated Delivery Date</label>
+                      <input
+                        type="date"
+                        value={selectedOrder.estimatedDeliveryDate ? new Date(selectedOrder.estimatedDeliveryDate).toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const newDate = e.target.value;
+                          if (newDate) {
+                            setSelectedOrder({...selectedOrder, estimatedDeliveryDate: newDate});
+                          }
+                        }}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-bronze focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-1">Delivery Notes</label>
+                      <textarea
+                        value={selectedOrder.deliveryNotes || ''}
+                        onChange={(e) => {
+                          const notes = e.target.value;
+                          setSelectedOrder({...selectedOrder, deliveryNotes: notes});
+                        }}
+                        placeholder="Add delivery instructions or notes"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-bronze focus:outline-none h-20 resize-none"
+                      />
+                      <div className="flex space-x-2 mt-2">
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, false);
+                          }}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={() => {
+                            updateOrderStatus(selectedOrder._id, selectedOrder.orderStatus, selectedOrder.paymentStatus, selectedOrder.notes, selectedOrder.estimatedDeliveryDate, selectedOrder.deliveryNotes, true);
+                          }}
+                          className="px-4 py-2 bg-bronze text-black rounded-lg hover:bg-gold transition-colors text-sm font-medium"
+                        >
+                          Save & Email Customer
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getPaymentStatusColor(selectedOrder.paymentStatus)}`}>

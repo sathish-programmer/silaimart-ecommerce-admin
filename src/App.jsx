@@ -33,7 +33,7 @@ function App() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || !['admin', 'superadmin'].includes(user.role)) {
     return (
       <Router>
         <div className="min-h-screen bg-black">

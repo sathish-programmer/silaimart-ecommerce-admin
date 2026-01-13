@@ -14,7 +14,7 @@ export const useAuthStore = create((set, get) => ({
       const response = await axios.post(`${API_URL}/auth/login`, { email, password });
       const { token, user } = response.data;
       
-      if (user.role !== 'admin') {
+      if (!['admin', 'superadmin'].includes(user.role)) {
         throw new Error('Admin access required');
       }
       
@@ -43,7 +43,7 @@ export const useAuthStore = create((set, get) => ({
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       const response = await axios.get(`${API_URL}/auth/profile`);
       
-      if (response.data.role !== 'admin') {
+      if (!['admin', 'superadmin'].includes(response.data.role)) {
         get().logout();
         return;
       }

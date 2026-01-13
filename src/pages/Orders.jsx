@@ -428,7 +428,7 @@ const Orders = () => {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4">Order Items</h3>
                 <div className="space-y-3">
-                  {selectedOrder.items?.map((item, index) => (
+                  {(selectedOrder.items || []).map((item, index) => (
                     <div key={index} className="flex items-center space-x-4 p-4 bg-gray-800 rounded-lg">
                       <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center">
                         {item.product?.images?.[0] ? (
@@ -439,16 +439,21 @@ const Orders = () => {
                       </div>
                       <div className="flex-1">
                         <h4 className="text-white font-medium">{item.product?.name || 'Product'}</h4>
-                        <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
+                        <p className="text-gray-400 text-sm">Qty: {item.quantity || 0}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-bronze font-semibold">₹{((item.discountPrice || item.price) * item.quantity).toLocaleString()}</p>
-                        {item.discountPrice && item.discountPrice < item.price && (
-                          <p className="text-gray-500 text-sm line-through">₹{(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="text-bronze font-semibold">₹{(((item.discountPrice || item.price || 0) * (item.quantity || 0))).toLocaleString()}</p>
+                        {item.discountPrice && item.discountPrice < (item.price || 0) && (
+                          <p className="text-gray-500 text-sm line-through">₹{((item.price || 0) * (item.quantity || 0)).toLocaleString()}</p>
                         )}
                       </div>
                     </div>
                   ))}
+                  {(!selectedOrder.items || selectedOrder.items.length === 0) && (
+                    <div className="text-center py-8 text-gray-400">
+                      <p>No items found in this order</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

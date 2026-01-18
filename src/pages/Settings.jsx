@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { CogIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiCall } from '../utils/api';
+import { useAuthStore } from '../store/authStore';
 
 const Settings = () => {
   const [settings, setSettings] = useState({
@@ -25,9 +24,17 @@ const Settings = () => {
     tax: {
       enabled: true,
       rate: 18
+    },
+    loyalty: {
+      enabled: true,
+      pointsPerRupee: 0.1,
+      minimumRedeemPoints: 100,
+      redemptionRate: 1
     }
   });
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchSettings();
@@ -35,23 +42,26 @@ const Settings = () => {
 
   const fetchSettings = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await axios.get(`${API_URL}/settings`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setSettings(response.data.settings);
+      const response = await apiCall('/admin/settings');
+      const data = await response.json();
+      setSettings(data.settings);
     } catch (error) {
       console.error('Error fetching settings:', error);
+      toast.error('Failed to fetch settings');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSave = async () => {
+    if (!isSuperAdmin) {
+      toast.error('Only Super Admins can update settings');
+      return;
+    }
     try {
-      const token = localStorage.getItem('admin_token');
-      await axios.put(`${API_URL}/settings`, settings, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      await apiCall('/admin/settings', {
+        method: 'PUT',
+        body: JSON.stringify(settings)
       });
       toast.success('Settings updated successfully');
     } catch (error) {
@@ -60,18 +70,43 @@ const Settings = () => {
     }
   };
 
+  const handleFieldChange = (section, field, value) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [section]: {
+        ...prevSettings[section],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleNestedFieldChange = (section, parentField, field, value) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [section]: {
+        ...prevSettings[section],
+        [parentField]: {
+          ...prevSettings[section][parentField],
+          [field]: value
+        }
+      }
+    }));
+  };
+
   if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <button
-          onClick={handleSave}
-          className="bg-bronze text-black px-4 py-2 rounded-lg hover:bg-gold"
-        >
-          Save Settings
-        </button>
+        {isSuperAdmin && (
+          <button
+            onClick={handleSave}
+            className="bg-bronze text-black px-4 py-2 rounded-lg hover:bg-gold"
+          >
+            Save Settings
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -86,14 +121,9 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   checked={settings.payment.razorpay.enabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    payment: {
-                      ...settings.payment,
-                      razorpay: { ...settings.payment.razorpay, enabled: e.target.checked }
-                    }
-                  })}
+                  onChange={(e) => handleNestedFieldChange('payment', 'razorpay', 'enabled', e.target.checked)}
                   className="mr-3"
+                  disabled={!isSuperAdmin}
                 />
                 <span className="font-semibold">Razorpay (Recommended for India)</span>
               </label>
@@ -105,15 +135,10 @@ const Settings = () => {
                     <input
                       type="text"
                       value={settings.payment.razorpay.keyId}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          razorpay: { ...settings.payment.razorpay, keyId: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'razorpay', 'keyId', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="rzp_test_..."
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                   <div>
@@ -121,15 +146,10 @@ const Settings = () => {
                     <input
                       type="password"
                       value={settings.payment.razorpay.keySecret}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          razorpay: { ...settings.payment.razorpay, keySecret: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'razorpay', 'keySecret', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="Enter secret key"
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                 </div>
@@ -142,14 +162,9 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   checked={settings.payment.stripe.enabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    payment: {
-                      ...settings.payment,
-                      stripe: { ...settings.payment.stripe, enabled: e.target.checked }
-                    }
-                  })}
+                  onChange={(e) => handleNestedFieldChange('payment', 'stripe', 'enabled', e.target.checked)}
                   className="mr-3"
+                  disabled={!isSuperAdmin}
                 />
                 <span className="font-semibold">Stripe (International)</span>
               </label>
@@ -161,15 +176,10 @@ const Settings = () => {
                     <input
                       type="text"
                       value={settings.payment.stripe.publicKey}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          stripe: { ...settings.payment.stripe, publicKey: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'stripe', 'publicKey', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="pk_test_..."
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                   <div>
@@ -177,15 +187,10 @@ const Settings = () => {
                     <input
                       type="password"
                       value={settings.payment.stripe.secretKey}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          stripe: { ...settings.payment.stripe, secretKey: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'stripe', 'secretKey', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="sk_test_..."
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                 </div>
@@ -198,14 +203,9 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   checked={settings.payment.qr.enabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    payment: {
-                      ...settings.payment,
-                      qr: { ...settings.payment.qr, enabled: e.target.checked }
-                    }
-                  })}
+                  onChange={(e) => handleNestedFieldChange('payment', 'qr', 'enabled', e.target.checked)}
                   className="mr-3"
+                  disabled={!isSuperAdmin}
                 />
                 <span className="font-semibold">QR Code Payment (UPI)</span>
               </label>
@@ -217,15 +217,10 @@ const Settings = () => {
                     <input
                       type="text"
                       value={settings.payment.qr.upiId}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          qr: { ...settings.payment.qr, upiId: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'qr', 'upiId', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="yourname@paytm"
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                   <div>
@@ -233,15 +228,10 @@ const Settings = () => {
                     <input
                       type="text"
                       value={settings.payment.qr.merchantName}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          qr: { ...settings.payment.qr, merchantName: e.target.value }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'qr', 'merchantName', e.target.value)}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                       placeholder="SilaiMart"
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                 </div>
@@ -254,14 +244,9 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   checked={settings.payment.cod.enabled}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    payment: {
-                      ...settings.payment,
-                      cod: { ...settings.payment.cod, enabled: e.target.checked }
-                    }
-                  })}
+                  onChange={(e) => handleNestedFieldChange('payment', 'cod', 'enabled', e.target.checked)}
                   className="mr-3"
+                  disabled={!isSuperAdmin}
                 />
                 <span className="font-semibold">Cash on Delivery</span>
               </label>
@@ -273,14 +258,9 @@ const Settings = () => {
                     <input
                       type="number"
                       value={settings.payment.cod.minimumAmount}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          cod: { ...settings.payment.cod, minimumAmount: parseInt(e.target.value) }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'cod', 'minimumAmount', parseInt(e.target.value))}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                   <div>
@@ -288,14 +268,9 @@ const Settings = () => {
                     <input
                       type="number"
                       value={settings.payment.cod.maximumAmount}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        payment: {
-                          ...settings.payment,
-                          cod: { ...settings.payment.cod, maximumAmount: parseInt(e.target.value) }
-                        }
-                      })}
+                      onChange={(e) => handleNestedFieldChange('payment', 'cod', 'maximumAmount', parseInt(e.target.value))}
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                      disabled={!isSuperAdmin}
                     />
                   </div>
                 </div>
@@ -314,11 +289,9 @@ const Settings = () => {
               <input
                 type="number"
                 value={settings.shipping.freeShippingThreshold}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  shipping: { ...settings.shipping, freeShippingThreshold: parseInt(e.target.value) }
-                })}
+                onChange={(e) => handleFieldChange('shipping', 'freeShippingThreshold', parseInt(e.target.value))}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                disabled={!isSuperAdmin}
               />
             </div>
 
@@ -327,11 +300,9 @@ const Settings = () => {
               <input
                 type="number"
                 value={settings.shipping.standardShipping}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  shipping: { ...settings.shipping, standardShipping: parseInt(e.target.value) }
-                })}
+                onChange={(e) => handleFieldChange('shipping', 'standardShipping', parseInt(e.target.value))}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                disabled={!isSuperAdmin}
               />
             </div>
 
@@ -340,11 +311,9 @@ const Settings = () => {
               <input
                 type="number"
                 value={settings.shipping.expressShipping}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  shipping: { ...settings.shipping, expressShipping: parseInt(e.target.value) }
-                })}
+                onChange={(e) => handleFieldChange('shipping', 'expressShipping', parseInt(e.target.value))}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                disabled={!isSuperAdmin}
               />
             </div>
           </div>
@@ -355,14 +324,9 @@ const Settings = () => {
               <input
                 type="text"
                 value={settings.shipping.estimatedDelivery.standard}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  shipping: {
-                    ...settings.shipping,
-                    estimatedDelivery: { ...settings.shipping.estimatedDelivery, standard: e.target.value }
-                  }
-                })}
+                onChange={(e) => handleNestedFieldChange('shipping', 'estimatedDelivery', 'standard', e.target.value)}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                disabled={!isSuperAdmin}
               />
             </div>
 
@@ -371,14 +335,9 @@ const Settings = () => {
               <input
                 type="text"
                 value={settings.shipping.estimatedDelivery.express}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  shipping: {
-                    ...settings.shipping,
-                    estimatedDelivery: { ...settings.shipping.estimatedDelivery, express: e.target.value }
-                  }
-                })}
+                onChange={(e) => handleNestedFieldChange('shipping', 'estimatedDelivery', 'express', e.target.value)}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                disabled={!isSuperAdmin}
               />
             </div>
           </div>
@@ -393,11 +352,9 @@ const Settings = () => {
               <input
                 type="checkbox"
                 checked={settings.tax.enabled}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  tax: { ...settings.tax, enabled: e.target.checked }
-                })}
+                onChange={(e) => handleFieldChange('tax', 'enabled', e.target.checked)}
                 className="mr-3"
+                disabled={!isSuperAdmin}
               />
               Enable Tax Calculation
             </label>
@@ -408,12 +365,65 @@ const Settings = () => {
                 <input
                   type="number"
                   value={settings.tax.rate}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    tax: { ...settings.tax, rate: parseFloat(e.target.value) }
-                  })}
+                  onChange={(e) => handleFieldChange('tax', 'rate', parseFloat(e.target.value))}
                   className="w-32 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                  disabled={!isSuperAdmin}
                 />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Loyalty Program Settings */}
+        <div className="bg-gray-900 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Loyalty Program</h2>
+          
+          <div className="space-y-4">
+            <label className="flex items-center text-white">
+              <input
+                type="checkbox"
+                checked={settings.loyalty?.enabled || false}
+                onChange={(e) => handleFieldChange('loyalty', 'enabled', e.target.checked)}
+                className="mr-3"
+                disabled={!isSuperAdmin}
+              />
+              Enable Loyalty Program
+            </label>
+
+            {settings.loyalty?.enabled && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-white mb-2">Points per ₹10 spent</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={settings.loyalty?.pointsPerRupee * 10 || 1}
+                    onChange={(e) => handleFieldChange('loyalty', 'pointsPerRupee', parseFloat(e.target.value) / 10)}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    disabled={!isSuperAdmin}
+                  />
+                </div>
+                <div>
+                  <label className="block text-white mb-2">Minimum Redeem Points</label>
+                  <input
+                    type="number"
+                    value={settings.loyalty?.minimumRedeemPoints || 100}
+                    onChange={(e) => handleFieldChange('loyalty', 'minimumRedeemPoints', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    disabled={!isSuperAdmin}
+                  />
+                </div>
+                <div>
+                  <label className="block text-white mb-2">Redemption Rate (₹ per point)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={settings.loyalty?.redemptionRate || 1}
+                    onChange={(e) => handleFieldChange('loyalty', 'redemptionRate', parseFloat(e.target.value))}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    disabled={!isSuperAdmin}
+                  />
+                </div>
               </div>
             )}
           </div>

@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [masterValues, setMasterValues] = useState({});
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
@@ -44,6 +45,7 @@ const Products = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchMasterValues();
   }, []);
 
   // Auto-generate SKU when name changes
@@ -134,6 +136,15 @@ const Products = () => {
     } catch (error) {
       console.error('Error fetching categories:', error);
       setCategories([]);
+    }
+  };
+
+  const fetchMasterValues = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/master-values`);
+      setMasterValues(response.data.masterValues || {});
+    } catch (error) {
+      console.error('Error fetching master values:', error);
     }
   };
 
@@ -435,13 +446,9 @@ const Products = () => {
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                   >
                     <option value="">Select Stone</option>
-                    <option value="Marble">Marble</option>
-                    <option value="Granite">Granite</option>
-                    <option value="Sandstone">Sandstone</option>
-                    <option value="Limestone">Limestone</option>
-                    <option value="Basalt">Basalt</option>
-                    <option value="Soapstone">Soapstone</option>
-                    <option value="Other">Other</option>
+                    {masterValues.stone_types?.map(stone => (
+                      <option key={stone._id} value={stone.value}>{stone.label}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -456,11 +463,9 @@ const Products = () => {
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
                   >
                     <option value="">Select Finish</option>
-                    <option value="Polished">Polished</option>
-                    <option value="Matte">Matte</option>
-                    <option value="Antique">Antique</option>
-                    <option value="Natural">Natural</option>
-                    <option value="Carved">Carved</option>
+                    {masterValues.finishes?.map(finish => (
+                      <option key={finish._id} value={finish.value}>{finish.label}</option>
+                    ))}
                   </select>
                 </div>
 

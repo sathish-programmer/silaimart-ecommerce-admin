@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import RichTextEditor from '../components/RichTextEditor';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiCall } from '../utils/api';
+import { useAuthStore } from '../store/authStore';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -19,18 +18,19 @@ const Blogs = () => {
     isPublished: false,
     featuredImage: { url: '', alt: '' }
   });
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchBlogs();
-  }, []);
+  }, [isSuperAdmin]);
 
   const fetchBlogs = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await axios.get(`${API_URL}/admin/blogs`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setBlogs(response.data.blogs || []);
+      const endpoint = isSuperAdmin ? '/admin/blogs' : '/admin/blogs/my-blogs';
+      const response = await apiCall(endpoint);
+      const data = await response.json();
+      setBlogs(data.blogs || []);
     } catch (error) {
       console.error('Error fetching blogs:', error);
       toast.error('Failed to fetch blogs');
@@ -42,20 +42,26 @@ const Blogs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('admin_token');
       const submitData = {
         ...formData,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
 
       if (editBlog) {
-        await axios.put(`${API_URL}/admin/blogs/${editBlog._id}`, submitData, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        // Check if the current user is the creator or a superadmin
+        if (!isSuperAdmin && user.userId !== editBlog.createdBy._id) {
+          toast.error('You can only edit your own blogs.');
+          return;
+        }
+        await apiCall(`/admin/blogs/${editBlog._id}`, {
+          method: 'PUT',
+          body: JSON.stringify(submitData)
         });
         toast.success('Blog updated successfully');
       } else {
-        await axios.post(`${API_URL}/admin/blogs`, submitData, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        await apiCall('/admin/blogs', {
+          method: 'POST',
+          body: JSON.stringify(submitData)
         });
         toast.success('Blog created successfully');
       }
@@ -100,6 +106,11 @@ const Blogs = () => {
 
   const openModal = (blog = null) => {
     if (blog) {
+      // Allow superadmin to edit any blog, and regular admin to edit their own.
+      if (!isSuperAdmin && user.userId !== blog.createdBy._id) {
+        toast.error('You can only edit your own blogs.');
+        return;
+      }
       setEditBlog(blog);
       setFormData({
         ...blog,
@@ -113,11 +124,17 @@ const Blogs = () => {
   };
 
   const handleDelete = async (id) => {
+    // Check if the current user is the creator or a superadmin
+    const blogToDelete = blogs.find(blog => blog._id === id);
+    if (blogToDelete && !isSuperAdmin && user.userId !== blogToDelete.createdBy._id) {
+      toast.error('You can only delete your own blogs.');
+      return;
+    }
+
     if (window.confirm('Are you sure?')) {
       try {
-        const token = localStorage.getItem('admin_token');
-        await axios.delete(`${API_URL}/admin/blogs/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        await apiCall(`/admin/blogs/${id}`, {
+          method: 'DELETE'
         });
         toast.success('Blog deleted successfully');
         fetchBlogs();
@@ -129,11 +146,19 @@ const Blogs = () => {
   };
 
   const togglePublish = async (id, isPublished) => {
+    // Check if the current user is the creator or a superadmin
+    const blogToToggle = blogs.find(blog => blog._id === id);
+    if (blogToToggle && !isSuperAdmin && user.userId !== blogToToggle.createdBy._id) {
+      toast.error('You can only change the publish status of your own blogs.');
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('admin_token');
-      await axios.put(`${API_URL}/admin/blogs/${id}`, 
-        { isPublished: !isPublished },
-        { headers: { 'Authorization': `Bearer ${token}` } }
+      await apiCall(`/admin/blogs/${id}`, 
+        {
+          method: 'PUT',
+          body: JSON.stringify({ isPublished: !isPublished })
+        }
       );
       toast.success(`Blog ${!isPublished ? 'published' : 'unpublished'} successfully`);
       fetchBlogs();

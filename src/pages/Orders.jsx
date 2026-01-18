@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { EyeIcon, CheckCircleIcon, TruckIcon, XCircleIcon, ClockIcon, CreditCardIcon, BanknotesIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
@@ -15,6 +16,8 @@ const Orders = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAction, setPaymentAction] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchOrders();
@@ -22,7 +25,12 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await apiCall('/admin/orders');
+      let url = '/admin/orders';
+      if (!isSuperAdmin) {
+        // For regular admins, filter orders based on products they uploaded
+        url = '/admin/orders/my-products'; // This endpoint will need to be created
+      }
+      const response = await apiCall(url);
       const data = await response.json();
       setOrders(data.orders || []);
     } catch (error) {

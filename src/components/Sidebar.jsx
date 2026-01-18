@@ -11,7 +11,11 @@ import {
   CogIcon,
   ScaleIcon,
   StarIcon,
-  RectangleStackIcon
+  RectangleStackIcon,
+  EnvelopeIcon,
+  UsersIcon,
+  DocumentPlusIcon,
+  AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 
 const Sidebar = () => {
@@ -28,10 +32,14 @@ const Sidebar = () => {
     { name: 'Blogs', href: '/blogs', icon: DocumentTextIcon },
     { name: 'Coupons', href: '/coupons', icon: TicketIcon },
     { name: 'Banners', href: '/banners', icon: RectangleStackIcon },
+    { name: 'Custom Orders', href: '/custom-orders', icon: DocumentPlusIcon },
+    { name: 'Users', href: '/users', icon: UsersIcon },
     ...(isSuperAdmin ? [
       { name: 'Policies', href: '/policies', icon: ScaleIcon },
       { name: 'AI Chatbot', href: '/chatbot', icon: ChatBubbleLeftRightIcon },
+      { name: 'Master Values', href: '/master-values', icon: AdjustmentsHorizontalIcon },
       { name: 'Settings', href: '/settings', icon: CogIcon },
+      { name: 'Email Marketing', href: '/email-marketing', icon: EnvelopeIcon }
     ] : [])
   ];
 

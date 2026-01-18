@@ -7,9 +7,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import SendOfferNotification from '../components/SendOfferNotification';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { apiCall } from '../utils/api';
+import { useAuthStore } from '../store/authStore';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -20,42 +19,40 @@ const Dashboard = () => {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [salesData, setSalesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [isSuperAdmin]);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      const [ordersRes, usersRes, productsRes] = await Promise.all([
-        axios.get(`${API_URL}/orders?limit=5`),
-        axios.get(`${API_URL}/auth/users`),
-        axios.get(`${API_URL}/products`)
-      ]);
+      const statsResponse = await apiCall('/admin/stats');
+      const statsData = await statsResponse.json();
 
-      const orders = ordersRes.data.orders || [];
-      const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-
-      setStats({
-        totalOrders: ordersRes.data.total || 0,
-        totalUsers: usersRes.data.total || 0,
-        totalRevenue,
-        totalProducts: productsRes.data.total || 0
-      });
-
-      setRecentOrders(orders);
-
-      // Mock sales data for chart
-      setSalesData([
-        { name: 'Jan', sales: 4000 },
-        { name: 'Feb', sales: 3000 },
-        { name: 'Mar', sales: 5000 },
-        { name: 'Apr', sales: 4500 },
-        { name: 'May', sales: 6000 },
-        { name: 'Jun', sales: 5500 }
-      ]);
+      if (statsResponse.ok) {
+        setStats(statsData.stats);
+        setRecentOrders(statsData.stats.recentOrders);
+        // Mock sales data for chart - this should ideally come from backend
+        setSalesData([
+          { name: 'Jan', sales: 4000 },
+          { name: 'Feb', sales: 3000 },
+          { name: 'Mar', sales: 5000 },
+          { name: 'Apr', sales: 4500 },
+          { name: 'May', sales: 6000 },
+          { name: 'Jun', sales: 5500 }
+        ]);
+      } else {
+        toast.error(statsData.message || 'Failed to fetch dashboard stats');
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to fetch dashboard data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,6 +65,12 @@ const Dashboard = () => {
         </div>
         <Icon className={`h-8 w-8 ${color}`} />
       </div>
+    </div>
+  );
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bronze"></div>
     </div>
   );
 

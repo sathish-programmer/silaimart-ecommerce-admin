@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiCall } from '../utils/api';
+import { useAuthStore } from '../store/authStore';
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
@@ -21,18 +20,19 @@ const Coupons = () => {
     usageLimit: '',
     isActive: true
   });
+  const { user } = useAuthStore();
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchCoupons();
-  }, []);
+  }, [isSuperAdmin]);
 
   const fetchCoupons = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await axios.get(`${API_URL}/admin/coupons`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setCoupons(response.data.coupons || []);
+      const endpoint = isSuperAdmin ? '/admin/coupons' : '/admin/coupons/my-coupons';
+      const response = await apiCall(endpoint);
+      const data = await response.json();
+      setCoupons(data.coupons || []);
     } catch (error) {
       console.error('Error fetching coupons:', error);
       toast.error('Failed to fetch coupons');
@@ -43,17 +43,21 @@ const Coupons = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isSuperAdmin) {
+      toast.error('Only Super Admins can manage coupons.');
+      return;
+    }
     try {
-      const token = localStorage.getItem('admin_token');
-      
       if (editCoupon) {
-        await axios.put(`${API_URL}/admin/coupons/${editCoupon._id}`, formData, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        await apiCall(`/admin/coupons/${editCoupon._id}`, {
+          method: 'PUT',
+          body: JSON.stringify(formData)
         });
         toast.success('Coupon updated successfully');
       } else {
-        await axios.post(`${API_URL}/admin/coupons`, formData, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        await apiCall('/admin/coupons', {
+          method: 'POST',
+          body: JSON.stringify(formData)
         });
         toast.success('Coupon created successfully');
       }
@@ -68,11 +72,14 @@ const Coupons = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!isSuperAdmin) {
+      toast.error('Only Super Admins can delete coupons.');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this coupon?')) {
       try {
-        const token = localStorage.getItem('admin_token');
-        await axios.delete(`${API_URL}/admin/coupons/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        await apiCall(`/admin/coupons/${id}`, {
+          method: 'DELETE'
         });
         toast.success('Coupon deleted successfully');
         fetchCoupons();
@@ -99,6 +106,10 @@ const Coupons = () => {
   };
 
   const openModal = (coupon = null) => {
+    if (!isSuperAdmin) {
+      toast.error('Only Super Admins can add or edit coupons.');
+      return;
+    }
     if (coupon) {
       setEditCoupon(coupon);
       setFormData({

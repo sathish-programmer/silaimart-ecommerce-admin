@@ -37,7 +37,10 @@ export const useAuthStore = create((set, get) => ({
 
   checkAuth: async () => {
     const token = get().token;
-    if (!token) return;
+    if (!token) {
+      set({ user: null, token: null });
+      return false;
+    }
 
     try {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -45,12 +48,14 @@ export const useAuthStore = create((set, get) => ({
       
       if (!['admin', 'superadmin'].includes(response.data.role)) {
         get().logout();
-        return;
+        return false;
       }
       
       set({ user: response.data });
+      return true;
     } catch (error) {
       get().logout();
+      return false;
     }
   }
 }));

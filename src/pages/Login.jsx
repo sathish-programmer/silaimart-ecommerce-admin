@@ -4,10 +4,12 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import {useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -17,9 +19,9 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);
-    
     if (result.success) {
       toast.success('Login successful!');
+      navigate(`/`);
     } else {
       toast.error(result.message);
     }

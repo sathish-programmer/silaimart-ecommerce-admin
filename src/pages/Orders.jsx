@@ -475,8 +475,14 @@ const Orders = () => {
                   </div>
                   {selectedOrder.discount > 0 && (
                     <div className="flex justify-between text-green-400">
-                      <span>Discount:</span>
+                      <span>Coupon Discount:</span>
                       <span>-₹{selectedOrder.discount?.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {selectedOrder.loyaltyDiscount > 0 && (
+                    <div className="flex justify-between text-blue-400">
+                      <span>Loyalty Points Used ({selectedOrder.loyaltyPointsUsed} points):</span>
+                      <span>-₹{selectedOrder.loyaltyDiscount?.toLocaleString()}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-gray-300">

@@ -61,7 +61,7 @@ const Coupons = () => {
         });
         toast.success('Coupon created successfully');
       }
-      
+
       setShowModal(false);
       resetForm();
       fetchCoupons();
@@ -129,64 +129,74 @@ const Coupons = () => {
     setShowModal(true);
   };
 
-  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
+  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Coupons</h1>
+    <div className="p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Coupons</h1>
+          <p className="text-gray-500 font-medium mt-1">Manage discounts and promotional offers</p>
+        </div>
         <button
           onClick={() => openModal()}
-          className="bg-bronze text-black px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gold"
+          className="bg-primary-600 text-white px-6 py-3 rounded-2xl flex items-center space-x-2 hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 font-bold active:scale-[0.98]"
         >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Coupon</span>
+          <PlusIcon className="h-5 w-5 stroke-2" />
+          <span>New Coupon</span>
         </button>
       </div>
 
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm shadow-gray-200/50">
         <table className="w-full">
-          <thead className="bg-gray-800">
+          <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-white">Code</th>
-              <th className="px-6 py-3 text-left text-white">Type</th>
-              <th className="px-6 py-3 text-left text-white">Value</th>
-              <th className="px-6 py-3 text-left text-white">Status</th>
-              <th className="px-6 py-3 text-left text-white">Expiry</th>
-              <th className="px-6 py-3 text-left text-white">Actions</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest pl-10">Code</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Type</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Value</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Status</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Expiry</th>
+              <th className="px-8 py-5 text-right text-gray-400 font-black uppercase text-xs tracking-widest pr-10">Actions</th>
             </tr>
           </thead>
           <tbody>
             {coupons.map((coupon) => (
-              <tr key={coupon._id} className="border-b border-gray-800">
-                <td className="px-6 py-4 text-white font-mono">{coupon.code}</td>
-                <td className="px-6 py-4 text-gray-300 capitalize">{coupon.type}</td>
-                <td className="px-6 py-4 text-bronze">
-                  {coupon.type === 'percentage' ? `${coupon.value}%` : `₹${coupon.value}`}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    coupon.isActive ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                  }`}>
-                    {coupon.isActive ? 'Active' : 'Inactive'}
+              <tr key={coupon._id} className="border-b border-gray-50 last:border-0 hover:bg-stone-50/50 transition-colors group">
+                <td className="px-8 py-5 pl-10">
+                  <span className="bg-stone-100 text-gray-900 font-black px-3 py-1.5 rounded-lg font-mono text-sm tracking-widest">
+                    {coupon.code}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-300">
-                  {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString() : 'No expiry'}
+                <td className="px-8 py-5 text-gray-500 font-bold capitalize">{coupon.type}</td>
+                <td className="px-8 py-5">
+                  <span className="text-primary-600 font-black text-lg">
+                    {coupon.type === 'percentage' ? `${coupon.value}%` : `₹${coupon.value}`}
+                  </span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex space-x-2">
+                <td className="px-8 py-5">
+                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${coupon.isActive
+                    ? 'bg-green-50 text-green-700 border-green-100'
+                    : 'bg-rose-50 text-rose-700 border-rose-100'
+                    }`}>
+                    {coupon.isActive ? 'Active' : 'Passive'}
+                  </span>
+                </td>
+                <td className="px-8 py-5 text-gray-400 font-medium">
+                  {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'Lifetime'}
+                </td>
+                <td className="px-8 py-5 text-right pr-10">
+                  <div className="flex justify-end space-x-1">
                     <button
                       onClick={() => openModal(coupon)}
-                      className="text-blue-400 hover:text-blue-300"
+                      className="p-2.5 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
                     >
-                      <PencilIcon className="h-5 w-5" />
+                      <PencilIcon className="h-5 w-5 stroke-2" />
                     </button>
                     <button
                       onClick={() => handleDelete(coupon._id)}
-                      className="text-red-400 hover:text-red-300"
+                      className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                     >
-                      <TrashIcon className="h-5 w-5" />
+                      <TrashIcon className="h-5 w-5 stroke-2" />
                     </button>
                   </div>
                 </td>
@@ -197,96 +207,115 @@ const Coupons = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md max-h-screen overflow-y-auto">
-            <h2 className="text-xl font-bold text-white mb-4">
-              {editCoupon ? 'Edit Coupon' : 'Add Coupon'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md max-h-screen overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center mb-10">
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                {editCoupon ? 'Edit Coupon' : 'New Promo'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
+              >
+                <XMarkIcon className="h-7 w-7" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-white mb-2">Code</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Unique Code</label>
                 <input
                   type="text"
                   value={formData.code}
                   onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white font-mono"
+                  placeholder="e.g. FESTIVE50"
+                  className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black font-mono tracking-widest focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   required
                 />
               </div>
-              <div>
-                <label className="block text-white mb-2">Type</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
-                >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed Amount</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Offer Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all appearance-none"
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed (₹)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Benefit Value</label>
+                  <input
+                    type="number"
+                    value={formData.value}
+                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                    placeholder="e.g. 20"
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+                    required
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-white mb-2">Value</label>
-                <input
-                  type="number"
-                  value={formData.value}
-                  onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-white mb-2">Min Order Amount</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Min. Purchase (₹)</label>
                 <input
                   type="number"
                   value={formData.minimumAmount}
                   onChange={(e) => setFormData({ ...formData, minimumAmount: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
+                  placeholder="e.g. 500"
+                  className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-white mb-2">Valid From *</label>
-                <input
-                  type="date"
-                  value={formData.validFrom}
-                  onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={formData.validFrom}
+                    onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">End Date</label>
+                  <input
+                    type="date"
+                    value={formData.validUntil}
+                    onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-white mb-2">Valid Until *</label>
-                <input
-                  type="date"
-                  value={formData.validUntil}
-                  onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white"
-                  required
-                />
-              </div>
-              <div className="flex items-center mb-4">
-                <label className="flex items-center text-white">
+              <div className="bg-stone-50 p-6 rounded-[2rem] flex items-center justify-between">
+                <div>
+                  <p className="text-gray-900 font-black text-sm uppercase tracking-widest">Active Status</p>
+                  <p className="text-gray-500 text-xs font-medium">Global toggle for this discount</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="mr-2"
+                    className="sr-only peer"
                   />
-                  Active Coupon
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600 shadow-inner"></div>
                 </label>
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-400 hover:text-white"
+                  className="px-8 py-4 bg-gray-50 text-gray-500 font-bold rounded-2xl hover:bg-gray-100 transition-all font-bold"
                 >
-                  Cancel
+                  Discard
                 </button>
                 <button
                   type="submit"
-                  className="bg-bronze text-black px-4 py-2 rounded hover:bg-gold"
+                  className="px-8 py-4 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 active:scale-[0.98]"
                 >
-                  {editCoupon ? 'Update' : 'Create'}
+                  {editCoupon ? 'Save Changes' : 'Create Coupon'}
                 </button>
               </div>
             </form>

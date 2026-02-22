@@ -1,4 +1,4 @@
-import { useState, useEffect,  } from 'react';
+import { useState, useEffect, } from 'react';
 import { UserIcon, MagnifyingGlassIcon, ArrowLeftIcon, ArrowRightIcon, TrashIcon, NoSymbolIcon, CheckCircleIcon, BellAlertIcon, EyeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
@@ -102,109 +102,112 @@ const Users = () => {
 
   if (loading) return (
     <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bronze"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
     </div>
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Users Management</h1>
-          <p className="text-gray-400 mt-1">
-            {isSuperAdmin ? 
-              'Manage all registered users' :
-              'View users who have purchased your products'
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Users Management</h1>
+          <p className="text-gray-500 font-medium mt-1">
+            {isSuperAdmin ?
+              'Manage and monitor all platform members' :
+              'View customers who support your craft'
             }
           </p>
         </div>
-        <div className="relative">
+        <div className="relative group">
           <input
             type="text"
-            placeholder="Search users by email or name..."
+            placeholder="Search by name or email..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="w-64 px-4 py-2 pl-10 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none"
+            className="w-full md:w-80 px-5 py-3 pl-12 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold shadow-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
           />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-primary-500 transition-colors" />
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700">
+      <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm shadow-gray-200/50 p-2">
         {users.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-800">
+            <table className="min-w-full divide-y divide-gray-50">
+              <thead className="bg-gray-50/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Role</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Joined</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest pl-10">Name</th>
+                  <th scope="col" className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Email</th>
+                  <th scope="col" className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Role</th>
+                  <th scope="col" className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-widest">Joined</th>
+                  <th scope="col" className="px-8 py-5 text-right text-xs font-black text-gray-400 uppercase tracking-widest pr-10">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody className="divide-y divide-gray-50">
                 {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-800">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={user._id} className="hover:bg-stone-50/50 transition-colors group">
+                    <td className="px-8 py-5 whitespace-nowrap pl-10">
                       <div className="flex items-center">
-                        <UserIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <div className="text-sm font-medium text-white">{user.name}</div>
+                        <div className="h-10 w-10 bg-primary-50 rounded-full flex items-center justify-center mr-3 group-hover:bg-primary-600 transition-colors">
+                          <UserIcon className="h-5 w-5 text-primary-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <div className="text-sm font-bold text-gray-900">{user.name}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-300">{user.email}</div>
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <div className="text-sm text-gray-500 font-medium">{user.email}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${
-                        user.role === 'superadmin' ? 'bg-bronze/20 text-bronze' :
-                        user.role === 'admin' ? 'bg-blue-600/20 text-blue-400' :
-                        'bg-gray-600/20 text-gray-300'
-                      }`}>
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full transition-all ${user.role === 'superadmin' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                          user.role === 'admin' ? 'bg-primary-50 text-primary-700 border border-primary-100' :
+                            'bg-gray-100 text-gray-600 border border-gray-200'
+                        }`}>
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                    <td className="px-8 py-5 whitespace-nowrap text-sm text-gray-400 font-medium">
+                      {new Date(user.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => viewUserDetails(user._id)}
-                        className="text-bronze hover:text-gold mr-3"
-                        title="View Details"
-                      >
-                        <EyeIcon className="h-5 w-5" />
-                      </button>
-                      {isSuperAdmin && currentUser?._id !== user._id && user.role !== 'superadmin' && (
-                        <>
-                          {user.isBlocked ? (
+                    <td className="px-8 py-5 whitespace-nowrap text-right pr-10">
+                      <div className="flex justify-end space-x-1">
+                        <button
+                          onClick={() => viewUserDetails(user._id)}
+                          className="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all"
+                          title="View Details"
+                        >
+                          <EyeIcon className="h-5 w-5" />
+                        </button>
+                        {isSuperAdmin && currentUser?._id !== user._id && user.role !== 'superadmin' && (
+                          <>
+                            {user.isBlocked ? (
+                              <button
+                                onClick={() => handleUnblockUser(user._id)}
+                                className="p-2 text-green-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all"
+                                title="Unblock User"
+                              >
+                                <CheckCircleIcon className="h-5 w-5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleBlockUser(user._id)}
+                                className="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-xl transition-all"
+                                title="Block User"
+                              >
+                                <NoSymbolIcon className="h-5 w-5" />
+                              </button>
+                            )}
                             <button
-                              onClick={() => handleUnblockUser(user._id)}
-                              className="text-green-500 hover:text-green-700 mr-3"
-                              title="Unblock User"
+                              onClick={() => handleDeleteUser(user._id)}
+                              className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                              title="Delete User"
                             >
-                              <CheckCircleIcon className="h-5 w-5" />
+                              <TrashIcon className="h-5 w-5" />
                             </button>
-                          ) : (
-                            <button
-                              onClick={() => handleBlockUser(user._id)}
-                              className="text-yellow-500 hover:text-yellow-700 mr-3"
-                              title="Block User"
-                            >
-                              <NoSymbolIcon className="h-5 w-5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeleteUser(user._id)}
-                            className="text-red-500 hover:text-red-700"
-                            title="Delete User"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </>
-                      )}
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -212,43 +215,40 @@ const Users = () => {
             </table>
           </div>
         ) : (
-          <div className="text-center py-8">
-            <UserIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-400 mb-2">No Users Found</h3>
-            <p className="text-gray-500">No users match your current criteria.</p>
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <UserIcon className="h-10 w-10 text-gray-300" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">No users found</h3>
+            <p className="text-gray-500 font-medium max-w-xs mx-auto">We couldn't find any users matching your current criteria.</p>
           </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <nav
-            className="flex items-center justify-between pt-4"
-            aria-label="Pagination"
-          >
-            <div className="flex-1 flex justify-between sm:justify-end">
+          <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between rounded-b-[2rem]">
+            <div className="hidden sm:block">
+              <p className="text-sm text-gray-500 font-medium">
+                Showing <span className="font-black text-gray-900">{(currentPage - 1) * 10 + 1}</span> to <span className="font-black text-gray-900">{Math.min(currentPage * 10, users.length + (currentPage - 1) * 10)}</span> of <span className="font-black text-gray-900">{users.length + (currentPage - 1) * 10}</span> results
+              </p>
+            </div>
+            <div className="flex-1 flex justify-between sm:justify-end gap-3">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-6 py-2.5 bg-white border border-gray-100 text-sm font-bold rounded-xl text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
               >
-                <ArrowLeftIcon className="h-5 w-5 mr-2" /> Previous
+                <ArrowLeftIcon className="h-4 w-4 mr-2 stroke-2" /> Previous
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative inline-flex items-center px-6 py-2.5 bg-white border border-gray-100 text-sm font-bold rounded-xl text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
               >
-                Next <ArrowRightIcon className="h-5 w-5 ml-2" />
+                Next <ArrowRightIcon className="h-4 w-4 ml-2 stroke-2" />
               </button>
             </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-300">
-                  Showing <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> to <span className="font-medium">{Math.min(currentPage * 10, users.length + (currentPage - 1) * 10)}</span> of <span className="font-medium">{users.length + (currentPage - 1) * 10}</span> results
-                </p>
-              </div>
-            </div>
-          </nav>
+          </div>
         )}
       </div>
     </div>

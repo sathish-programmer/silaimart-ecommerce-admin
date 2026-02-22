@@ -44,31 +44,30 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div className="w-64 bg-white border-r border-gray-100 flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-gray-100">
         <Link to="/" className="flex items-center">
-          <span className="text-xl font-bold text-bronze">
+          <span className="text-xl font-bold text-primary-600">
             {isSuperAdmin ? 'Super Admin' : 'Admin'}
           </span>
         </Link>
-        <p className="text-xs text-gray-400 mt-1">{user?.name}</p>
+        <p className="text-xs text-gray-500 mt-1 font-medium">{user?.name}</p>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
         {navigation.map((item) => {
-          const isActive = location.pathname === item.href || 
+          const isActive = location.pathname === item.href ||
             (item.href !== '/' && location.pathname.startsWith(item.href));
           return (
             <Link
               key={item.name}
               to={item.href}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-bronze text-black'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-              }`}
+              className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                  ? 'bg-primary-50 text-primary-700 shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-primary-600'
+                }`}
             >
               <item.icon className="h-5 w-5" />
               <span>{item.name}</span>

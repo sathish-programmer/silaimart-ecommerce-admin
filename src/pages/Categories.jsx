@@ -33,7 +33,7 @@ const Categories = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('admin_token');
-      
+
       if (editCategory) {
         await axios.put(`${API_URL}/admin/categories/${editCategory._id}`, formData, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -45,7 +45,7 @@ const Categories = () => {
         });
         toast.success('Category created successfully');
       }
-      
+
       setShowModal(false);
       setEditCategory(null);
       setFormData({ name: '', description: '' });
@@ -78,108 +78,120 @@ const Categories = () => {
     setShowModal(true);
   };
 
-  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
+  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Categories</h1>
+    <div className="p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Categories</h1>
+          <p className="text-gray-500 font-medium mt-1">Organize your sculptures by type and style</p>
+        </div>
         <button
           onClick={() => openModal()}
-          className="bg-bronze text-black px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gold transition-colors"
+          className="bg-primary-600 text-white px-6 py-3 rounded-2xl flex items-center space-x-2 hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 font-bold active:scale-[0.98]"
         >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Category</span>
+          <PlusIcon className="h-5 w-5 stroke-2" />
+          <span>New Category</span>
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.isArray(categories) && categories.map((category) => (
-          <div key={category._id} className="bg-gray-900 rounded-lg p-6">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-semibold text-white">{category.name}</h3>
-              <div className="flex space-x-2">
+          <div key={category._id} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 group">
+            <div className="flex justify-between items-start mb-6">
+              <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 transition-colors duration-300">
+                <PlusIcon className="h-6 w-6 text-primary-600 group-hover:text-white transition-colors" />
+              </div>
+              <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => openModal(category)}
-                  className="text-blue-400 hover:text-blue-300"
+                  className="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                 >
                   <PencilIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(category._id)}
-                  className="text-red-400 hover:text-red-300"
+                  className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                 >
                   <TrashIcon className="h-5 w-5" />
                 </button>
               </div>
             </div>
-            <p className="text-gray-400">{category.description}</p>
-            <div className="mt-3 text-sm text-gray-500">
-              Slug: {category.slug}
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2 group-hover:text-primary-600 transition-colors">{category.name}</h3>
+            <p className="text-gray-500 font-medium line-clamp-2 min-h-[3rem] mb-6">{category.description || 'No description provided for this collection.'}</p>
+            <div className="border-t border-gray-50 pt-4 mt-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Unique Slug</span>
+              <p className="text-gray-900 font-bold mt-1 bg-stone-50 px-3 py-1.5 rounded-lg inline-block">{category.slug}</p>
             </div>
           </div>
         ))}
       </div>
 
       {categories.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No categories found</p>
+        <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-gray-200">
+          <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <PlusIcon className="h-10 w-10 text-gray-300" />
+          </div>
+          <p className="text-gray-900 text-xl font-black tracking-tight mb-2">No collections yet</p>
+          <p className="text-gray-500 font-medium mb-8">Start organizing your products into meaningful categories</p>
           <button
             onClick={() => openModal()}
-            className="mt-4 text-bronze hover:underline"
+            className="bg-primary-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-100"
           >
-            Create your first category
+            Create first category
           </button>
         </div>
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">
-                {editCategory ? 'Edit Category' : 'Add Category'}
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center mb-10">
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                {editCategory ? 'Edit Type' : 'New Type'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <XMarkIcon className="h-7 w-7" />
               </button>
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-white mb-2">Name *</label>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Category Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:border-bronze focus:outline-none"
+                  placeholder="e.g. Bronze Sculptures"
+                  className="w-full bg-stone-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   required
                 />
               </div>
-              <div className="mb-6">
-                <label className="block text-white mb-2">Description</label>
+              <div>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white h-24 focus:border-bronze focus:outline-none"
-                  placeholder="Enter category description..."
+                  className="w-full bg-stone-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 font-medium h-32 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none resize-none transition-all"
+                  placeholder="Tell customers about this collection..."
                 />
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                  className="px-6 py-3.5 bg-gray-50 text-gray-500 font-bold rounded-2xl hover:bg-gray-100 transition-all"
                 >
-                  Cancel
+                  Go Back
                 </button>
                 <button
                   type="submit"
-                  className="bg-bronze text-black px-4 py-2 rounded hover:bg-gold"
+                  className="px-8 py-3.5 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 active:scale-[0.98]"
                 >
-                  {editCategory ? 'Update' : 'Create'}
+                  {editCategory ? 'Save Changes' : 'Create Type'}
                 </button>
               </div>
             </form>

@@ -19,9 +19,9 @@ const Banners = () => {
     position: 'shop-top',
     order: 0,
     isActive: true,
-    backgroundColor: '#CD7F32',
+    backgroundColor: '#7c3aed', // primary-600
     textColor: '#FFFFFF',
-    buttonColor: '#D4AF37'
+    buttonColor: '#fbbf24' // amber-400
   });
 
   useEffect(() => {
@@ -76,7 +76,7 @@ const Banners = () => {
         });
         toast.success('Banner created successfully');
       }
-      
+
       setShowModal(false);
       resetForm();
       fetchBanners();
@@ -112,9 +112,9 @@ const Banners = () => {
       position: 'shop-top',
       order: 0,
       isActive: true,
-      backgroundColor: '#CD7F32',
+      backgroundColor: '#7c3aed',
       textColor: '#FFFFFF',
-      buttonColor: '#D4AF37'
+      buttonColor: '#fbbf24'
     });
     setEditBanner(null);
   };
@@ -133,73 +133,83 @@ const Banners = () => {
     setShowModal(true);
   };
 
-  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
+  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Shop Banners</h1>
+    <div className="p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Shop Banners</h1>
+          <p className="text-gray-500 font-medium mt-1">Design eye-catching promotions for your store</p>
+        </div>
         <button
           onClick={() => openModal()}
-          className="bg-bronze text-black px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gold transition-colors"
+          className="bg-primary-600 text-white px-6 py-3 rounded-2xl flex items-center space-x-2 hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 font-bold active:scale-[0.98]"
         >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Banner</span>
+          <PlusIcon className="h-5 w-5 stroke-2" />
+          <span>Add New Banner</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {banners.map((banner) => (
-          <div key={banner._id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-bronze/50 transition-all duration-300 group">
-            <div className="relative">
+          <div key={banner._id} className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-500 group">
+            <div className="relative h-56 overflow-hidden">
               {banner.image?.url ? (
-                <img 
-                  src={banner.image.url} 
+                <img
+                  src={banner.image.url}
                   alt={banner.image.alt}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
               ) : (
-                <div className="w-full h-48 bg-gray-800 flex items-center justify-center">
-                  <PhotoIcon className="h-12 w-12 text-gray-600" />
+                <div className="w-full h-full bg-stone-50 flex items-center justify-center">
+                  <PhotoIcon className="h-12 w-12 text-gray-300" />
                 </div>
               )}
-              <div className="absolute top-3 right-3 flex space-x-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-4 right-4 flex space-x-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                 <button
                   onClick={() => openModal(banner)}
-                  className="p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all"
+                  className="p-3 bg-white/90 backdrop-blur-md hover:bg-white text-primary-600 rounded-2xl shadow-lg transition-all active:scale-90"
                 >
-                  <PencilIcon className="h-4 w-4" />
+                  <PencilIcon className="h-5 w-5 stroke-2" />
                 </button>
                 <button
                   onClick={() => handleDelete(banner._id)}
-                  className="p-2 bg-black/50 hover:bg-red-600 text-white rounded-full transition-all"
+                  className="p-3 bg-white/90 backdrop-blur-md hover:bg-rose-50 text-rose-600 rounded-2xl shadow-lg transition-all active:scale-90"
                 >
-                  <TrashIcon className="h-4 w-4" />
+                  <TrashIcon className="h-5 w-5 stroke-2" />
                 </button>
               </div>
-              <div className="absolute bottom-3 left-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  banner.isActive ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                }`}>
-                  {banner.isActive ? 'Active' : 'Inactive'}
+              <div className="absolute bottom-4 left-4">
+                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border ${banner.isActive
+                  ? 'bg-green-500/80 text-white border-green-400/50'
+                  : 'bg-rose-500/80 text-white border-rose-400/50'
+                  }`}>
+                  {banner.isActive ? 'Active' : 'Passive'}
                 </span>
               </div>
             </div>
-            <div className="p-6">
-              <div className="mb-3">
-                <h3 className="text-white font-bold text-lg mb-1 group-hover:text-bronze transition-colors">{banner.title}</h3>
+            <div className="p-8">
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 bg-primary-50 px-3 py-1 rounded-lg">
+                    {banner.position.replace('-', ' ')}
+                  </span>
+                  <span className="text-gray-400 font-bold text-xs">Order: {banner.order}</span>
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2 group-hover:text-primary-600 transition-colors uppercase truncate">{banner.title}</h3>
                 {banner.subtitle && (
-                  <p className="text-gray-400 text-sm">{banner.subtitle}</p>
+                  <p className="text-gray-500 font-bold text-sm tracking-wide">{banner.subtitle}</p>
                 )}
               </div>
               {banner.description && (
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2">{banner.description}</p>
+                <p className="text-gray-500 font-medium text-sm mb-6 line-clamp-2 leading-relaxed">{banner.description}</p>
               )}
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-500 bg-gray-800 px-2 py-1 rounded">
-                  {banner.position.replace('-', ' ').toUpperCase()}
-                </span>
-                <span className="text-gray-500">Order: {banner.order}</span>
+              <div className="flex items-center space-x-3 pt-4 border-t border-gray-50">
+                <div className="w-8 h-8 rounded-full border border-gray-100 shadow-inner" style={{ backgroundColor: banner.backgroundColor }} title="Background" />
+                <div className="w-8 h-8 rounded-full border border-gray-100 shadow-inner" style={{ backgroundColor: banner.textColor }} title="Text Color" />
+                <div className="w-8 h-8 rounded-full border border-gray-100 shadow-inner" style={{ backgroundColor: banner.buttonColor }} title="Button Color" />
               </div>
             </div>
           </div>
@@ -207,62 +217,67 @@ const Banners = () => {
       </div>
 
       {banners.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No banners found</p>
+        <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-gray-200">
+          <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <PhotoIcon className="h-10 w-10 text-gray-300" />
+          </div>
+          <p className="text-gray-900 text-xl font-black tracking-tight mb-2">No promotional banners</p>
+          <p className="text-gray-500 font-medium mb-8">Start highlighting your best collections and offers</p>
           <button
             onClick={() => openModal()}
-            className="mt-4 text-bronze hover:underline"
+            className="bg-primary-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-100"
           >
-            Create your first banner
+            Create first banner
           </button>
         </div>
       )}
 
-      {/* Banner Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">
-                {editBanner ? 'Edit Banner' : 'Add Banner'}
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center p-8 border-b border-gray-50">
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                {editBanner ? 'Edit Promo' : 'New Promo'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <XMarkIcon className="h-7 w-7" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-white mb-2">Title *</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Visual Title *</label>
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g. SUMMER SALE"
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Subtitle</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Subtitle</label>
                   <input
                     type="text"
                     value={formData.subtitle}
-                    onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                    placeholder="e.g. Up to 50% Off"
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Position</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Placement</label>
                   <select
                     value={formData.position}
-                    onChange={(e) => setFormData({...formData, position: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all appearance-none"
                   >
                     <option value="shop-top">Shop Top</option>
                     <option value="hero">Hero Section</option>
@@ -271,29 +286,30 @@ const Banners = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Order</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Index Order</label>
                   <input
                     type="number"
                     value={formData.order}
-                    onChange={(e) => setFormData({...formData, order: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-white mb-2">Description</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Campaign Description</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white h-20"
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Elaborate on the offer..."
+                  className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-medium h-28 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none resize-none transition-all"
                 />
               </div>
 
               {/* Image Upload */}
               <div>
-                <label className="block text-white mb-2">Banner Image</label>
-                <div className="border-2 border-dashed border-gray-700 rounded-lg p-4">
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Promotion Artwork</label>
+                <div className="border-2 border-dashed border-gray-200 rounded-3xl p-8 bg-stone-50/50 hover:bg-stone-50 hover:border-primary-300 transition-all group/upload">
                   <input
                     type="file"
                     accept="image/*"
@@ -303,108 +319,129 @@ const Banners = () => {
                   />
                   <label
                     htmlFor="banner-image"
-                    className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-800 rounded-lg p-4 transition-colors"
+                    className="flex flex-col items-center justify-center cursor-pointer"
                   >
-                    <PhotoIcon className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-gray-400">Click to upload banner image</span>
+                    <PhotoIcon className="h-12 w-12 text-gray-300 mb-4 group-hover/upload:scale-110 group-hover/upload:text-primary-500 transition-all" />
+                    <span className="text-gray-900 font-bold">Select high-quality artwork</span>
+                    <span className="text-gray-400 text-[10px] font-black uppercase mt-1 tracking-widest">Recommended: 1920x600 for wide banners</span>
                   </label>
                 </div>
                 {formData.image.url && (
-                  <img 
-                    src={formData.image.url} 
-                    alt="Preview" 
-                    className="mt-2 w-full h-32 object-cover rounded"
-                  />
+                  <div className="mt-6 relative rounded-2xl overflow-hidden border border-gray-100 group/preview">
+                    <img
+                      src={formData.image.url}
+                      alt="Preview"
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                      <p className="text-white font-black text-xs uppercase tracking-widest">Current Artwork</p>
+                    </div>
+                  </div>
                 )}
               </div>
 
               {/* Link Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-white mb-2">Button Text</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Call to Action Text</label>
                   <input
                     type="text"
                     value={formData.link.text}
                     onChange={(e) => setFormData({
-                      ...formData, 
-                      link: {...formData.link, text: e.target.value}
+                      ...formData,
+                      link: { ...formData.link, text: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    placeholder="e.g. SHOP NOW"
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Button Link</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Target Path / URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={formData.link.url}
                     onChange={(e) => setFormData({
-                      ...formData, 
-                      link: {...formData.link, url: e.target.value}
+                      ...formData,
+                      link: { ...formData.link, url: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    placeholder="e.g. /shop or https://..."
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               {/* Color Settings */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-white mb-2">Background Color</label>
-                  <input
-                    type="color"
-                    value={formData.backgroundColor}
-                    onChange={(e) => setFormData({...formData, backgroundColor: e.target.value})}
-                    className="w-full h-10 bg-gray-800 border border-gray-700 rounded"
-                  />
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Surface Color</label>
+                  <div className="flex items-center space-x-3 bg-stone-50 p-3 rounded-2xl border border-gray-100">
+                    <input
+                      type="color"
+                      value={formData.backgroundColor}
+                      onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                      className="w-10 h-10 bg-transparent border-0 rounded-lg cursor-pointer transition-transform hover:scale-110"
+                    />
+                    <span className="text-[10px] font-black font-mono text-gray-400">{formData.backgroundColor.toUpperCase()}</span>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Text Color</label>
-                  <input
-                    type="color"
-                    value={formData.textColor}
-                    onChange={(e) => setFormData({...formData, textColor: e.target.value})}
-                    className="w-full h-10 bg-gray-800 border border-gray-700 rounded"
-                  />
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Typography Color</label>
+                  <div className="flex items-center space-x-3 bg-stone-50 p-3 rounded-2xl border border-gray-100">
+                    <input
+                      type="color"
+                      value={formData.textColor}
+                      onChange={(e) => setFormData({ ...formData, textColor: e.target.value })}
+                      className="w-10 h-10 bg-transparent border-0 rounded-lg cursor-pointer transition-transform hover:scale-110"
+                    />
+                    <span className="text-[10px] font-black font-mono text-gray-400">{formData.textColor.toUpperCase()}</span>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Button Color</label>
-                  <input
-                    type="color"
-                    value={formData.buttonColor}
-                    onChange={(e) => setFormData({...formData, buttonColor: e.target.value})}
-                    className="w-full h-10 bg-gray-800 border border-gray-700 rounded"
-                  />
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Action Color</label>
+                  <div className="flex items-center space-x-3 bg-stone-50 p-3 rounded-2xl border border-gray-100">
+                    <input
+                      type="color"
+                      value={formData.buttonColor}
+                      onChange={(e) => setFormData({ ...formData, buttonColor: e.target.value })}
+                      className="w-10 h-10 bg-transparent border-0 rounded-lg cursor-pointer transition-transform hover:scale-110"
+                    />
+                    <span className="text-[10px] font-black font-mono text-gray-400">{formData.buttonColor.toUpperCase()}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="flex items-center text-white">
+              <div className="bg-stone-50 p-6 rounded-[2rem] flex items-center justify-between">
+                <div>
+                  <p className="text-gray-900 font-black text-sm uppercase tracking-widest">Active Status</p>
+                  <p className="text-gray-500 text-xs font-medium">Control if this banner is visible live</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                    className="mr-2"
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="sr-only peer"
                   />
-                  Active Banner
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600 shadow-inner"></div>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-800">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                  className="px-8 py-4 bg-gray-50 text-gray-500 font-bold rounded-2xl hover:bg-gray-100 transition-all"
                 >
-                  Cancel
+                  Discard
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-bronze text-black rounded hover:bg-gold"
+                  className="px-8 py-4 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 active:scale-[0.98]"
                 >
-                  {editBanner ? 'Update' : 'Create'} Banner
+                  {editBanner ? 'Save Changes' : 'Publish Banner'}
                 </button>
               </div>
             </form>

@@ -51,8 +51,8 @@ function AppContent() {
   const AdminRoute = ({ children, requiredRole }) => {
     if (isAuthLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-black">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-bronze"></div>
+        <div className="min-h-screen flex items-center justify-center bg-stone-50">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
         </div>
       );
     }
@@ -68,16 +68,16 @@ function AppContent() {
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-bronze"></div>
+      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-stone-50 text-gray-900 flex">
       {user && ['admin', 'superadmin'].includes(user.role) && <Sidebar />}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {user && ['admin', 'superadmin'].includes(user.role) && <Header />}
         <main className="flex-1 p-6 overflow-auto">
           <Routes>
@@ -97,7 +97,7 @@ function AppContent() {
             <Route path="/chatbot" element={<AdminRoute><ChatbotManager /></AdminRoute>} />
             <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
             <Route path="/email-marketing" element={<AdminRoute><EmailMarketing /></AdminRoute>} />
-            
+
             {/* Superadmin Only Routes */}
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/users/:id" element={<AdminRoute><UserDetail /></AdminRoute>} />
@@ -108,13 +108,14 @@ function AppContent() {
           </Routes>
         </main>
       </div>
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #CD7F32'
+            background: '#ffffff',
+            color: '#111827',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
           }
         }}
       />

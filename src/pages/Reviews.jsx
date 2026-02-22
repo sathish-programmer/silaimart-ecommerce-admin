@@ -124,126 +124,137 @@ const Reviews = () => {
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
-      i < rating ? 
-        <StarSolid key={i} className="h-4 w-4 text-yellow-400" /> :
-        <StarIcon key={i} className="h-4 w-4 text-gray-300" />
+      i < rating ?
+        <StarSolid key={i} className="h-5 w-5 text-amber-400 drop-shadow-sm" /> :
+        <StarIcon key={i} className="h-5 w-5 text-stone-200" />
     ));
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Reviews Management</h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded ${filter === 'all' ? 'bg-bronze text-black' : 'bg-gray-700 text-white'}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded ${filter === 'pending' ? 'bg-bronze text-black' : 'bg-gray-700 text-white'}`}
-          >
-            Pending
-          </button>
-          <button
-            onClick={() => setFilter('approved')}
-            className={`px-4 py-2 rounded ${filter === 'approved' ? 'bg-bronze text-black' : 'bg-gray-700 text-white'}`}
-          >
-            Approved
-          </button>
+    <div className="p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Reviews Management</h1>
+          <p className="text-gray-500 font-medium mt-1">Hear what your customers are saying</p>
+        </div>
+        <div className="flex p-1.5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+          {['all', 'pending', 'approved'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all capitalize ${filter === f
+                  ? 'bg-primary-600 text-white shadow-lg shadow-primary-200'
+                  : 'text-gray-500 hover:bg-stone-50'
+                }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-8">
         {reviews.map((review) => (
-          <div key={review._id} className="bg-gray-800 rounded-lg p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={review.product.images[0]?.url || '/placeholder.jpg'}
-                  alt={review.product.name}
-                  className="w-16 h-16 object-cover rounded"
-                />
+          <div key={review._id} className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 relative group">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
+              <div className="flex items-center space-x-6">
+                <div className="relative group/img">
+                  <img
+                    src={review.product.images[0]?.url || '/placeholder.jpg'}
+                    alt={review.product.name}
+                    className="w-20 h-20 object-cover rounded-[1.5rem] shadow-md group-hover/img:scale-105 transition-transform"
+                  />
+                  <div className="absolute -top-2 -right-2 bg-white rounded-full p-1.5 shadow-sm border border-gray-50 transition-transform group-hover/img:rotate-12">
+                    <StarSolid className="h-4 w-4 text-amber-400" />
+                  </div>
+                </div>
                 <div>
-                  <h3 className="text-white font-semibold">{review.product.name}</h3>
-                  <p className="text-gray-400">by {review.user.name}</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    {renderStars(review.rating)}
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight mb-1">{review.product.name}</h3>
+                  <div className="flex items-center text-gray-500 font-bold text-sm">
+                    <span className="bg-stone-50 px-3 py-1 rounded-lg">by {review.user.name}</span>
+                    <span className="mx-2 text-gray-200">/</span>
+                    <span className="text-gray-400 font-medium">{new Date(review.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className={`px-2 py-1 rounded text-xs ${
-                  review.isApproved ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'
-                }`}>
-                  {review.isApproved ? 'Approved' : 'Pending'}
+              <div className="flex items-center space-x-3">
+                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${review.isApproved
+                    ? 'bg-green-50 text-green-700 border-green-100'
+                    : 'bg-amber-50 text-amber-700 border-amber-100'
+                  }`}>
+                  {review.isApproved ? 'Approved' : 'Pending Verification'}
                 </span>
-                <span className="text-gray-400 text-sm">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </span>
+                <div className="flex items-center space-x-1 pl-4 border-l border-gray-100">
+                  {renderStars(review.rating)}
+                </div>
               </div>
             </div>
 
-            <p className="text-gray-300 mb-4">{review.comment}</p>
+            <div className="relative mb-8">
+              <span className="absolute -left-6 top-0 text-7xl font-serif text-gray-50 leading-none select-none">"</span>
+              <p className="text-gray-600 font-medium text-lg leading-relaxed relative z-10">{review.comment}</p>
+            </div>
 
             {review.images && review.images.length > 0 && (
-              <div className="flex space-x-2 mb-4">
+              <div className="flex flex-wrap gap-4 mb-8">
                 {review.images.map((image, index) => (
                   <img
                     key={index}
                     src={image}
                     alt={`Review ${index + 1}`}
-                    className="w-20 h-20 object-cover rounded"
+                    className="w-24 h-24 object-cover rounded-2xl hover:scale-110 transition-transform shadow-sm cursor-zoom-in"
                   />
                 ))}
               </div>
             )}
 
             {review.adminResponse && (
-              <div className="bg-gray-700 p-3 rounded mb-4">
-                <p className="text-sm text-gray-300">
-                  <strong>Admin Response:</strong> {review.adminResponse}
-                </p>
+              <div className="bg-primary-50 px-8 py-6 rounded-[2rem] mb-8 border border-primary-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <CheckIcon className="h-16 w-16 text-primary-600" />
+                </div>
+                <div className="relative z-10">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary-500 block mb-2">Team Response</span>
+                  <p className="text-primary-900 font-bold leading-relaxed">{review.adminResponse}</p>
+                </div>
               </div>
             )}
 
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end items-center gap-3 pt-6 border-t border-gray-50">
               <button
                 onClick={() => openEditModal(review)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-6 py-3 font-bold text-primary-600 hover:bg-primary-50 rounded-2xl transition-all"
               >
-                Edit
+                Edit Content
               </button>
               {!review.isApproved && (
                 <>
                   <button
                     onClick={() => setSelectedReview(review)}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    className="px-8 py-3.5 bg-green-500 text-white font-black rounded-2xl hover:bg-green-600 shadow-lg shadow-green-100 transition-all flex items-center"
                   >
-                    <CheckIcon className="h-4 w-4 inline mr-1" />
+                    <CheckIcon className="h-5 w-5 mr-2 stroke-[3px]" />
                     Approve
                   </button>
                   <button
                     onClick={() => updateReviewStatus(review._id, false)}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    className="px-8 py-3.5 bg-rose-50 text-rose-600 font-black rounded-2xl hover:bg-rose-100 transition-all flex items-center"
                   >
-                    <XMarkIcon className="h-4 w-4 inline mr-1" />
+                    <XMarkIcon className="h-5 w-5 mr-2 stroke-[3px]" />
                     Reject
                   </button>
                 </>
               )}
               <button
                 onClick={() => deleteReview(review._id)}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                className="p-3.5 bg-gray-50 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all"
+                title="Delete Permanentally"
               >
-                <TrashIcon className="h-4 w-4 inline mr-1" />
-                Delete
+                <TrashIcon className="h-5 w-5 stroke-2" />
               </button>
             </div>
           </div>
@@ -251,32 +262,32 @@ const Reviews = () => {
       </div>
 
       {/* Approval Modal */}
-      {selectedReview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-white text-lg font-semibold mb-4">Approve Review</h3>
+      {selectedReview && !showEditModal && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl border border-gray-100">
+            <h3 className="text-3xl font-black text-gray-900 tracking-tight mb-4">Official Response</h3>
+            <p className="text-gray-500 font-medium mb-8">Add a formal reply to this customer's feedback.</p>
             <textarea
               value={adminResponse}
               onChange={(e) => setAdminResponse(e.target.value)}
-              placeholder="Optional admin response..."
-              className="w-full p-3 bg-gray-700 text-white rounded mb-4"
-              rows="3"
+              placeholder="e.g. Thank you for your kind words! We are glad you liked our craft."
+              className="w-full p-5 bg-stone-50 border border-gray-100 rounded-3xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 outline-none resize-none h-40 transition-all"
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-4 mt-10 pt-8 border-t border-gray-50">
               <button
                 onClick={() => {
                   setSelectedReview(null);
                   setAdminResponse('');
                 }}
-                className="px-4 py-2 bg-gray-600 text-white rounded"
+                className="px-8 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all"
               >
-                Cancel
+                Skip
               </button>
               <button
                 onClick={() => updateReviewStatus(selectedReview._id, true, adminResponse)}
-                className="px-4 py-2 bg-green-600 text-white rounded"
+                className="px-10 py-4 bg-primary-600 text-white font-black rounded-2xl hover:bg-primary-700 shadow-xl shadow-primary-200 transition-all"
               >
-                Approve
+                Approve & Reply
               </button>
             </div>
           </div>
@@ -285,24 +296,32 @@ const Reviews = () => {
 
       {/* Edit Review Modal */}
       {showEditModal && selectedReview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-white text-lg font-semibold mb-4">Edit Review</h3>
-            
-            <form onSubmit={updateReview} className="space-y-4">
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center mb-10">
+              <h3 className="text-3xl font-black text-gray-900 tracking-tight">Modify Content</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
+              >
+                <XMarkIcon className="h-7 w-7" />
+              </button>
+            </div>
+
+            <form onSubmit={updateReview} className="space-y-10">
               <div>
-                <label className="block text-white mb-2">Rating</label>
-                <div className="flex space-x-1">
+                <label className="block text-gray-700 font-bold mb-4 uppercase text-xs tracking-widest pl-1">Star Rating</label>
+                <div className="flex space-x-3 bg-stone-50 p-4 rounded-3xl justify-center scale-110">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
-                      onClick={() => setEditForm({...editForm, rating: star})}
-                      className="hover:scale-110 transition-transform"
+                      onClick={() => setEditForm({ ...editForm, rating: star })}
+                      className="hover:scale-125 transition-transform"
                     >
-                      {star <= editForm.rating ? 
-                        <StarSolid className="h-6 w-6 text-yellow-400" /> :
-                        <StarIcon className="h-6 w-6 text-gray-300" />
+                      {star <= editForm.rating ?
+                        <StarSolid className="h-8 w-8 text-amber-400 drop-shadow-sm" /> :
+                        <StarIcon className="h-8 w-8 text-stone-200" />
                       }
                     </button>
                   ))}
@@ -310,41 +329,45 @@ const Reviews = () => {
               </div>
 
               <div>
-                <label className="block text-white mb-2">Comment</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Review Statement</label>
                 <textarea
                   value={editForm.comment}
-                  onChange={(e) => setEditForm({...editForm, comment: e.target.value})}
-                  className="w-full p-3 bg-gray-700 text-white rounded"
-                  rows="4"
+                  onChange={(e) => setEditForm({ ...editForm, comment: e.target.value })}
+                  className="w-full p-5 bg-stone-50 border border-gray-100 rounded-3xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 outline-none resize-none h-40 transition-all"
+                  placeholder="The customer's words..."
                   required
                 />
               </div>
 
-              <div>
-                <label className="flex items-center text-white">
+              <div className="bg-stone-50 p-6 rounded-[2rem] flex items-center justify-between">
+                <div>
+                  <p className="text-gray-900 font-black text-sm uppercase tracking-widest">Visibility</p>
+                  <p className="text-gray-500 text-xs font-medium">Approved status of this review</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={editForm.isApproved}
-                    onChange={(e) => setEditForm({...editForm, isApproved: e.target.checked})}
-                    className="mr-2"
+                    onChange={(e) => setEditForm({ ...editForm, isApproved: e.target.checked })}
+                    className="sr-only peer"
                   />
-                  Approved
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600 shadow-inner"></div>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded"
+                  className="px-8 py-4 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all"
                 >
-                  Cancel
+                  Go Back
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-bronze text-black rounded"
+                  className="px-10 py-4 bg-primary-600 text-white font-black rounded-2xl hover:bg-primary-700 shadow-xl shadow-primary-200 transition-all"
                 >
-                  Update
+                  Secure Save
                 </button>
               </div>
             </form>

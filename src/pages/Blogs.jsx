@@ -65,7 +65,7 @@ const Blogs = () => {
         });
         toast.success('Blog created successfully');
       }
-      
+
       setShowModal(false);
       resetForm();
       fetchBlogs();
@@ -154,7 +154,7 @@ const Blogs = () => {
     }
 
     try {
-      await apiCall(`/admin/blogs/${id}`, 
+      await apiCall(`/admin/blogs/${id}`,
         {
           method: 'PUT',
           body: JSON.stringify({ isPublished: !isPublished })
@@ -168,64 +168,70 @@ const Blogs = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
+  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div></div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Blogs</h1>
-        <button 
+    <div className="p-6 space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Blogs</h1>
+          <p className="text-gray-500 font-medium mt-1">Manage your platform stories and updates</p>
+        </div>
+        <button
           onClick={() => openModal()}
-          className="bg-bronze text-black px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gold"
+          className="bg-primary-600 text-white px-6 py-3 rounded-2xl flex items-center space-x-2 hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 font-bold active:scale-[0.98]"
         >
-          <PlusIcon className="h-5 w-5" />
-          <span>Add Blog</span>
+          <PlusIcon className="h-5 w-5 stroke-2" />
+          <span>Add New Blog</span>
         </button>
       </div>
 
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm shadow-gray-200/50">
         <table className="w-full">
-          <thead className="bg-gray-800">
+          <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-white">Title</th>
-              <th className="px-6 py-3 text-left text-white">Author</th>
-              <th className="px-6 py-3 text-left text-white">Status</th>
-              <th className="px-6 py-3 text-left text-white">Date</th>
-              <th className="px-6 py-3 text-left text-white">Actions</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Title</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Author</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Status</th>
+              <th className="px-8 py-5 text-left text-gray-400 font-black uppercase text-xs tracking-widest">Date</th>
+              <th className="px-8 py-5 text-right text-gray-400 font-black uppercase text-xs tracking-widest">Actions</th>
             </tr>
           </thead>
           <tbody>
             {blogs.map((blog) => (
-              <tr key={blog._id} className="border-b border-gray-800">
-                <td className="px-6 py-4 text-white">{blog.title}</td>
-                <td className="px-6 py-4 text-gray-300">{blog.author?.name}</td>
-                <td className="px-6 py-4">
+              <tr key={blog._id} className="border-b border-gray-50 last:border-0 hover:bg-stone-50/50 transition-colors group">
+                <td className="px-8 py-5">
+                  <span className="text-gray-900 font-bold group-hover:text-primary-600 transition-colors line-clamp-1">{blog.title}</span>
+                </td>
+                <td className="px-8 py-5 text-gray-500 font-medium">{blog.author?.name}</td>
+                <td className="px-8 py-5">
                   <button
                     onClick={() => togglePublish(blog._id, blog.isPublished)}
-                    className={`px-3 py-1 rounded text-sm ${
-                      blog.isPublished ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-300'
-                    }`}
+                    className={`px-4 py-1 rounded-full text-xs font-black transition-all ${blog.isPublished
+                        ? 'bg-green-50 text-green-700 border border-green-100'
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
+                      }`}
                   >
                     {blog.isPublished ? 'Published' : 'Draft'}
                   </button>
                 </td>
-                <td className="px-6 py-4 text-gray-300">
-                  {new Date(blog.createdAt).toLocaleDateString()}
+                <td className="px-8 py-5 text-gray-400 font-medium">
+                  {new Date(blog.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex space-x-2">
-                    <button className="text-blue-400 hover:text-blue-300">
+                <td className="px-8 py-5 text-right">
+                  <div className="flex justify-end space-x-2">
+                    <button className="p-2 text-primary-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
                       <EyeIcon className="h-5 w-5" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => openModal(blog)}
-                      className="text-green-400 hover:text-green-300"
+                      className="p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(blog._id)}
-                      className="text-red-400 hover:text-red-300"
+                      className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -237,48 +243,48 @@ const Blogs = () => {
         </table>
       </div>
 
-      {/* Blog Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">
-                {editBlog ? 'Edit Blog' : 'Add Blog'}
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center p-8 border-b border-gray-50">
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight tracking-tighter">
+                {editBlog ? 'Edit Story' : 'New Story'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <XMarkIcon className="h-8 w-8" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="p-8 space-y-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="md:col-span-2">
-                  <label className="block text-white mb-2">Title *</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Story Title *</label>
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter an engaging title..."
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:outline-none transition-all"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-white mb-2">Excerpt</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Excerpt</label>
                   <textarea
                     value={formData.excerpt}
-                    onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white h-20"
-                    placeholder="Brief description of the blog post..."
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-medium h-24 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:outline-none transition-all resize-none"
+                    placeholder="Brief description that hook readers..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Featured Image</label>
-                  <div className="border-2 border-dashed border-gray-700 rounded-lg p-4">
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Cover Image</label>
+                  <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 bg-stone-50/50 hover:bg-stone-50 hover:border-primary-300 transition-all group/upload">
                     <input
                       type="file"
                       accept="image/*"
@@ -288,18 +294,18 @@ const Blogs = () => {
                     />
                     <label
                       htmlFor="blog-image-upload"
-                      className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-800 rounded-lg p-4 transition-colors"
+                      className="flex flex-col items-center justify-center cursor-pointer p-4"
                     >
-                      <PhotoIcon className="h-8 w-8 text-gray-400 mb-2" />
-                      <span className="text-gray-400">Click to upload featured image</span>
-                      <span className="text-gray-500 text-sm mt-1">PNG, JPG, WEBP up to 10MB</span>
+                      <PhotoIcon className="h-10 w-10 text-gray-400 mb-3 group-hover/upload:scale-110 group-hover/upload:text-primary-500 transition-all" />
+                      <span className="text-gray-500 font-bold group-hover/upload:text-gray-900">Upload high-res image</span>
+                      <span className="text-gray-400 text-[10px] font-black uppercase mt-1 tracking-widest">PNG, JPG, WEBP up to 10MB</span>
                     </label>
                   </div>
                   {formData.featuredImage?.url && (
                     <div className="mt-4 relative">
-                      <img 
-                        src={formData.featuredImage.url} 
-                        alt={formData.featuredImage.alt || 'Preview'} 
+                      <img
+                        src={formData.featuredImage.url}
+                        alt={formData.featuredImage.alt || 'Preview'}
                         className="w-full h-48 object-cover rounded-lg"
                       />
                       <button
@@ -314,51 +320,62 @@ const Blogs = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Tags (comma separated)</label>
+                  <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Tags</label>
                   <input
                     type="text"
                     value={formData.tags}
-                    onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                    placeholder="sculpture, art, culture"
+                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:outline-none transition-all"
+                    placeholder="sculpture, art, culture (separated by comma)"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-white mb-2">Content *</label>
-                <RichTextEditor
-                  value={formData.content}
-                  onChange={(value) => setFormData({...formData, content: value})}
-                  placeholder="Write your blog content here..."
-                />
+                <label className="block text-gray-700 font-bold mb-4 uppercase text-xs tracking-widest pl-1">Story Content *</label>
+                <div className="rounded-2xl overflow-hidden border border-gray-100 ring-1 ring-gray-50">
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={(value) => setFormData({ ...formData, content: value })}
+                    placeholder="Unfold your story..."
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="flex items-center text-white">
+              <div className="bg-stone-50 p-6 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-xl border ${formData.isPublished ? 'bg-green-500 text-white border-green-400' : 'bg-white text-gray-400 border-gray-100'}`}>
+                    <PlusIcon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-gray-900 font-black text-sm">Status: {formData.isPublished ? 'Live' : 'Private Draft'}</p>
+                    <p className="text-gray-500 text-xs font-medium">{formData.isPublished ? 'Visible to all customers' : 'Visible only to admins'}</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={formData.isPublished}
-                    onChange={(e) => setFormData({...formData, isPublished: e.target.checked})}
-                    className="mr-2"
+                    onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                    className="sr-only peer"
                   />
-                  Publish immediately
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600 shadow-inner"></div>
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-800">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                  className="px-8 py-4 bg-gray-50 text-gray-500 font-bold rounded-2xl hover:bg-gray-100 transition-all font-bold"
                 >
-                  Cancel
+                  Discard Changes
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-bronze text-black rounded hover:bg-gold"
+                  className="px-8 py-4 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 active:scale-[0.98]"
                 >
-                  {editBlog ? 'Update' : 'Create'} Blog
+                  {editBlog ? 'Update' : 'Create'} Story
                 </button>
               </div>
             </form>

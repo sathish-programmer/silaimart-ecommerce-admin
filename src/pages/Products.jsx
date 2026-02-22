@@ -62,13 +62,13 @@ const Products = () => {
       const price = parseFloat(formData.price);
       const discountValue = parseFloat(formData.discountValue);
       let discountPrice;
-      
+
       if (formData.discountType === 'percentage') {
         discountPrice = price - (price * discountValue / 100);
       } else {
         discountPrice = price - discountValue;
       }
-      
+
       setFormData(prev => ({ ...prev, discountPrice: Math.max(0, discountPrice).toFixed(2) }));
     } else {
       setFormData(prev => ({ ...prev, discountPrice: '' }));
@@ -168,7 +168,7 @@ const Products = () => {
         });
         toast.success('Product created successfully');
       }
-      
+
       setShowModal(false);
       resetForm();
       fetchProducts();
@@ -252,58 +252,68 @@ const Products = () => {
     setShowModal(true);
   };
 
-  if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bronze"></div></div>;
+  if (loading) return (
+    <div className="flex justify-center p-12">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+    </div>
+  );
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Products</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Products</h1>
+          <p className="text-gray-500 text-sm mt-1">Manage your product catalog</p>
+        </div>
         <button
           onClick={() => openModal()}
-          className="bg-bronze text-black px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gold transition-colors"
+          className="bg-primary-600 text-white px-6 py-2.5 rounded-xl flex items-center space-x-2 hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-primary-100"
         >
           <PlusIcon className="h-5 w-5" />
-          <span>Add Product</span>
+          <span className="font-semibold">Add Product</span>
         </button>
       </div>
 
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-800">
-            <tr>
-              <th className="px-6 py-3 text-left text-white">Name</th>
-              <th className="px-6 py-3 text-left text-white">Category</th>
-              <th className="px-6 py-3 text-left text-white">Price</th>
-              <th className="px-6 py-3 text-left text-white">Stock</th>
-              <th className="px-6 py-3 text-left text-white">Status</th>
-              <th className="px-6 py-3 text-left text-white">Actions</th>
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100">
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product._id} className="border-b border-gray-800">
-                <td className="px-6 py-4 text-white">{product.name}</td>
-                <td className="px-6 py-4 text-gray-300">{product.category?.name}</td>
-                <td className="px-6 py-4 text-bronze">₹{product.price}</td>
-                <td className="px-6 py-4 text-gray-300">{product.stock}</td>
+              <tr key={product._id} className="border-b border-gray-50 hover:bg-stone-50 transition-colors">
                 <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    product.isActive ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
-                  }`}>
+                  <span className="text-gray-900 font-medium">{product.name}</span>
+                </td>
+                <td className="px-6 py-4 text-gray-600">{product.category?.name}</td>
+                <td className="px-6 py-4 text-primary-600 font-bold">₹{product.price.toLocaleString()}</td>
+                <td className="px-6 py-4 text-gray-600 font-medium">{product.stock}</td>
+                <td className="px-6 py-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${product.isActive ? 'bg-green-50 text-green-700' : 'bg-rose-50 text-rose-700'
+                    }`}>
                     {product.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-3">
                     <button
                       onClick={() => openModal(product)}
-                      className="text-blue-400 hover:text-blue-300"
+                      className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                      title="Edit Product"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="text-red-400 hover:text-red-300"
+                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      title="Delete Product"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -315,53 +325,53 @@ const Products = () => {
         </table>
       </div>
 
-      {/* Product Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">
-                {editProduct ? 'Edit Product' : 'Add Product'}
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center p-8 border-b border-gray-50">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                {editProduct ? 'Edit Product' : 'Add New Product'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-colors"
               >
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Basic Info */}
                 <div>
-                  <label className="block text-white mb-2">Product Name *</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Product Name *</label>
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                    placeholder="Enter product title"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">SKU (Auto-generated)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">SKU (Auto-generated)</label>
                   <input
                     type="text"
                     value={formData.sku}
-                    onChange={(e) => setFormData({...formData, sku: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-                    placeholder="Will be auto-generated from product name"
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-500 cursor-not-allowed"
+                    readOnly
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Category *</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Category *</label>
                   <select
                     value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     required
                   >
                     <option value="">Select Category</option>
@@ -376,23 +386,23 @@ const Products = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Price *</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Price *</label>
                   <input
                     type="number"
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     required
                   />
                 </div>
 
                 {/* Discount Section */}
                 <div>
-                  <label className="block text-white mb-2">Discount Type</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Discount Type</label>
                   <select
                     value={formData.discountType}
-                    onChange={(e) => setFormData({...formData, discountType: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, discountType: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   >
                     <option value="percentage">Percentage (%)</option>
                     <option value="amount">Fixed Amount (₹)</option>
@@ -400,50 +410,49 @@ const Products = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
                     Discount Value {formData.discountType === 'percentage' ? '(%)' : '(₹)'}
                   </label>
                   <input
                     type="number"
                     value={formData.discountValue}
-                    onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     placeholder={formData.discountType === 'percentage' ? 'Enter percentage' : 'Enter amount'}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Final Price (Auto-calculated)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Final Price</label>
                   <input
                     type="number"
                     value={formData.discountPrice}
                     readOnly
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-300 cursor-not-allowed"
-                    placeholder="Will be calculated automatically"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-primary-600 font-bold cursor-not-allowed"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Stock *</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Stock *</label>
                   <input
                     type="number"
                     value={formData.stock}
-                    onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     required
                   />
                 </div>
 
                 {/* Sculpture Details */}
                 <div>
-                  <label className="block text-white mb-2">Stone Type</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Stone Type</label>
                   <select
                     value={formData.sculptureDetails.stone}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, stone: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, stone: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   >
                     <option value="">Select Stone</option>
                     {masterValues.stone_types?.map(stone => (
@@ -453,14 +462,14 @@ const Products = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Finish</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Finish</label>
                   <select
                     value={formData.sculptureDetails.finish}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, finish: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, finish: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   >
                     <option value="">Select Finish</option>
                     {masterValues.finishes?.map(finish => (
@@ -470,138 +479,138 @@ const Products = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Deity/Subject</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Deity/Subject</label>
                   <input
                     type="text"
                     value={formData.sculptureDetails.deity}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, deity: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, deity: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Origin</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Origin</label>
                   <input
                     type="text"
                     value={formData.sculptureDetails.origin}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, origin: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, origin: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Artisan</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Artisan</label>
                   <input
                     type="text"
                     value={formData.sculptureDetails.artisan}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, artisan: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, artisan: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Technique</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Technique</label>
                   <input
                     type="text"
                     value={formData.sculptureDetails.technique}
                     onChange={(e) => setFormData({
                       ...formData,
-                      sculptureDetails: {...formData.sculptureDetails, technique: e.target.value}
+                      sculptureDetails: { ...formData.sculptureDetails, technique: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Material</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Material</label>
                   <input
                     type="text"
                     value={formData.material}
-                    onChange={(e) => setFormData({...formData, material: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Weight (kg)</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Weight (kg)</label>
                   <input
                     type="number"
                     step="0.1"
                     value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
               </div>
 
               {/* Dimensions Section */}
-              <div>
-                <label className="block text-white mb-2">Dimensions (inches)</label>
-                <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-4">
+                <label className="block text-gray-700 font-bold uppercase text-[10px] tracking-[0.2em] pl-1">Dimensions (inches)</label>
+                <div className="grid grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-gray-400 text-sm mb-1">Length</label>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Length</label>
                     <input
                       type="number"
                       step="0.1"
                       value={formData.dimensions.length}
                       onChange={(e) => setFormData({
                         ...formData,
-                        dimensions: {...formData.dimensions, length: e.target.value}
+                        dimensions: { ...formData.dimensions, length: e.target.value }
                       })}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                      className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-sm mb-1">Width</label>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Width</label>
                     <input
                       type="number"
                       step="0.1"
                       value={formData.dimensions.width}
                       onChange={(e) => setFormData({
                         ...formData,
-                        dimensions: {...formData.dimensions, width: e.target.value}
+                        dimensions: { ...formData.dimensions, width: e.target.value }
                       })}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                      className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-sm mb-1">Height</label>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Height</label>
                     <input
                       type="number"
                       step="0.1"
                       value={formData.dimensions.height}
                       onChange={(e) => setFormData({
                         ...formData,
-                        dimensions: {...formData.dimensions, height: e.target.value}
+                        dimensions: { ...formData.dimensions, height: e.target.value }
                       })}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                      className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-white mb-2">Description *</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Description *</label>
                 <RichTextEditor
                   value={formData.description}
-                  onChange={(value) => setFormData({...formData, description: value})}
+                  onChange={(value) => setFormData({ ...formData, description: value })}
                   placeholder="Enter product description..."
                 />
               </div>
 
               {/* Image Upload Section */}
-              <div>
-                <label className="block text-white mb-2">Product Images</label>
-                <div className="border-2 border-dashed border-gray-700 rounded-lg p-4">
+              <div className="space-y-4">
+                <label className="block text-gray-700 font-bold uppercase text-[10px] tracking-[0.2em] pl-1">Product Images</label>
+                <div className="border-2 border-dashed border-stone-200 rounded-3xl p-8 bg-stone-50 group hover:border-primary-300 hover:bg-primary-50/10 transition-all duration-300">
                   <input
                     type="file"
                     multiple
@@ -612,14 +621,14 @@ const Products = () => {
                   />
                   <label
                     htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-800 rounded-lg p-4 transition-colors"
+                    className="flex flex-col items-center justify-center cursor-pointer p-4 group"
                   >
-                    <PhotoIcon className="h-12 w-12 text-gray-400 mb-2" />
-                    <span className="text-gray-400">Click to upload images</span>
-                    <span className="text-gray-500 text-sm">PNG, JPG, WEBP up to 10MB each</span>
+                    <PhotoIcon className="h-12 w-12 text-gray-300 mb-4 group-hover:text-primary-500 transition-colors" />
+                    <span className="text-gray-500 font-black text-xs uppercase tracking-widest">Click to upload assets</span>
+                    <span className="text-gray-400 text-[10px] font-medium mt-1">PNG, JPG, WEBP • Max 10MB</span>
                   </label>
                 </div>
-                
+
                 {/* Image Preview */}
                 {formData.images.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-4">
@@ -644,54 +653,54 @@ const Products = () => {
               </div>
 
               {/* Sizes Section */}
-              <div>
-                <label className="block text-white mb-2">Available Sizes</label>
-                <div className="space-y-3">
+              <div className="space-y-6">
+                <label className="block text-gray-700 font-bold uppercase text-[10px] tracking-[0.2em] pl-1">Available Specifications (Options)</label>
+                <div className="space-y-4">
                   {formData.sizes.map((size, index) => (
-                    <div key={index} className="bg-gray-800 p-4 rounded-lg">
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div key={index} className="bg-stone-50 p-6 rounded-3xl border border-gray-50 relative group">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                         <div>
-                          <label className="block text-gray-400 text-sm mb-1">Size Name</label>
+                          <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Label</label>
                           <input
                             type="text"
                             value={size.name}
                             onChange={(e) => {
                               const newSizes = [...formData.sizes];
                               newSizes[index].name = e.target.value;
-                              setFormData({...formData, sizes: newSizes});
+                              setFormData({ ...formData, sizes: newSizes });
                             }}
-                            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
-                            placeholder="Small, Medium, Large"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-gray-900 font-bold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                            placeholder="e.g. 12 Inch"
                           />
                         </div>
                         <div>
-                          <label className="block text-gray-400 text-sm mb-1">Price (₹)</label>
+                          <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Price (₹)</label>
                           <input
                             type="number"
                             value={size.price}
                             onChange={(e) => {
                               const newSizes = [...formData.sizes];
                               newSizes[index].price = e.target.value;
-                              setFormData({...formData, sizes: newSizes});
+                              setFormData({ ...formData, sizes: newSizes });
                             }}
-                            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-gray-900 font-bold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-gray-400 text-sm mb-1">Stock</label>
+                          <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Stock</label>
                           <input
                             type="number"
                             value={size.stock}
                             onChange={(e) => {
                               const newSizes = [...formData.sizes];
                               newSizes[index].stock = e.target.value;
-                              setFormData({...formData, sizes: newSizes});
+                              setFormData({ ...formData, sizes: newSizes });
                             }}
-                            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-gray-900 font-bold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-gray-400 text-sm mb-1">Weight (kg)</label>
+                          <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1.5 ml-1">Mass (kg)</label>
                           <input
                             type="number"
                             step="0.1"
@@ -699,9 +708,9 @@ const Products = () => {
                             onChange={(e) => {
                               const newSizes = [...formData.sizes];
                               newSizes[index].weight = e.target.value;
-                              setFormData({...formData, sizes: newSizes});
+                              setFormData({ ...formData, sizes: newSizes });
                             }}
-                            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                            className="w-full px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-gray-900 font-bold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                           />
                         </div>
                         <div className="flex items-end">
@@ -709,11 +718,11 @@ const Products = () => {
                             type="button"
                             onClick={() => {
                               const newSizes = formData.sizes.filter((_, i) => i !== index);
-                              setFormData({...formData, sizes: newSizes});
+                              setFormData({ ...formData, sizes: newSizes });
                             }}
-                            className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                            className="p-3 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                           >
-                            Remove
+                            <TrashIcon className="h-5 w-5" />
                           </button>
                         </div>
                       </div>
@@ -729,61 +738,61 @@ const Products = () => {
                         weight: '',
                         dimensions: { length: '', width: '', height: '' }
                       };
-                      setFormData({...formData, sizes: [...formData.sizes, newSize]});
+                      setFormData({ ...formData, sizes: [...formData.sizes, newSize] });
                     }}
-                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                    className="w-full py-4 border-2 border-dashed border-stone-200 text-gray-400 font-black text-xs uppercase tracking-widest rounded-[2rem] hover:bg-stone-50 hover:text-primary-600 hover:border-primary-200 transition-all active:scale-[0.99]"
                   >
-                    Add Size Option
+                    + Manifest New Size Option
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-white mb-2">Tags (comma separated)</label>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Core Keywords (Tags)</label>
                 <input
                   type="text"
                   value={formData.tags}
-                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                  className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   placeholder="sculpture, handmade, religious"
                 />
               </div>
 
-              <div className="flex items-center space-x-6">
-                <label className="flex items-center text-white">
+              <div className="flex items-center space-x-12 px-2">
+                <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.isFeatured}
-                    onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
-                    className="mr-2"
+                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                    className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
                   />
-                  Featured Product
+                  Promote to Featured
                 </label>
 
-                <label className="flex items-center text-white">
+                <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                    className="mr-2"
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
                   />
-                  Active
+                  Core Activation
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-800">
+              <div className="flex justify-end space-x-6 pt-10 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                  className="px-8 py-3 bg-stone-100 text-gray-500 font-black rounded-2xl hover:bg-stone-200 transition-all active:scale-[0.98] text-xs uppercase tracking-widest"
                 >
-                  Cancel
+                  Discard
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-bronze text-black rounded hover:bg-gold"
+                  className="px-10 py-3 bg-primary-600 text-white font-black rounded-2xl hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all active:scale-[0.98] text-xs uppercase tracking-widest"
                 >
-                  {editProduct ? 'Update' : 'Create'} Product
+                  {editProduct ? 'Commit Update' : 'Initialize Product'}
                 </button>
               </div>
             </form>

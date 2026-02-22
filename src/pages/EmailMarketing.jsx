@@ -71,116 +71,125 @@ const EmailMarketing = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center space-x-3">
-          <EnvelopeIcon className="h-8 w-8 text-bronze" />
-          <span>Email Marketing</span>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center space-x-4">
+          <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+            <EnvelopeIcon className="h-8 w-8 text-primary-600" />
+          </div>
+          <span>Direct Communication</span>
         </h1>
-        <p className="text-gray-400 mt-1">Send custom emails to users or bulk emails for promotions and updates.</p>
+        <p className="text-gray-500 font-medium mt-1 pl-16">Formulate and dispatch targeted HTML updates to your customer segments</p>
       </div>
 
       {/* Email Type Selection */}
-      <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-        <h2 className="text-xl font-semibold text-white mb-4">Select Email Type</h2>
-        <div className="flex space-x-4">
+      <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-xl font-black text-gray-900 tracking-tight">Campaign Strategy</h2>
+          <p className="text-gray-500 text-xs font-medium uppercase tracking-[0.1em] mt-1">Select recipient scope</p>
+        </div>
+        <div className="flex space-x-2 bg-stone-100/50 p-1.5 rounded-2xl border border-gray-100">
           <button
             onClick={() => setEmailType('individual')}
-            className={`px-4 py-2 rounded-lg transition-all ${
-              emailType === 'individual'
-                ? 'bg-bronze text-black'
-                : 'bg-gray-700 text-white hover:bg-gray-600'
-            }`}
+            className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${emailType === 'individual'
+                ? 'bg-white text-primary-600 shadow-sm border border-gray-50'
+                : 'text-gray-400 hover:text-gray-600'
+              }`}
           >
-            Individual Email
+            Laser Targeted
           </button>
           <button
             onClick={() => setEmailType('bulk')}
-            className={`px-4 py-2 rounded-lg transition-all ${
-              emailType === 'bulk'
-                ? 'bg-bronze text-black'
-                : 'bg-gray-700 text-white hover:bg-gray-600'
-            }`}
+            className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${emailType === 'bulk'
+                ? 'bg-white text-primary-600 shadow-sm border border-gray-50'
+                : 'text-gray-400 hover:text-gray-600'
+              }`}
           >
-            Bulk Email
+            Mass Campaign
           </button>
         </div>
       </div>
 
       {/* Email Form */}
-      <div className="bg-gray-900 rounded-lg p-6 border border-gray-700 space-y-4">
-        <h2 className="text-xl font-semibold text-white mb-4">Compose Email</h2>
+      <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm space-y-10 max-w-5xl">
+        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Compose Newsletter</h2>
 
-        {emailType === 'individual' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {emailType === 'individual' ? (
+            <div>
+              <label htmlFor="recipient" className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Target Recipient Address</label>
+              <input
+                type="email"
+                id="recipient"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-gray-300"
+                placeholder="e.g., collector@silaimart.com"
+                disabled={loading || !isSuperAdmin}
+              />
+            </div>
+          ) : (
+            <div>
+              <label htmlFor="recipientType" className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Audience Segment</label>
+              <select
+                id="recipientType"
+                value={recipientType}
+                onChange={(e) => setRecipientType(e.target.value)}
+                className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all appearance-none cursor-pointer"
+                disabled={loading || !isSuperAdmin}
+              >
+                <option value="all_users">Authenticated Users Only</option>
+                <option value="all_admins">Administrative Network</option>
+                <option value="all">Complete Ecosystem</option>
+              </select>
+            </div>
+          )}
+
           <div>
-            <label htmlFor="recipient" className="block text-white text-sm font-medium mb-2">Recipient Email</label>
+            <label htmlFor="subject" className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Campaign Subject Line</label>
             <input
-              type="email"
-              id="recipient"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none"
-              placeholder="e.g., user@example.com"
+              type="text"
+              id="subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-gray-300"
+              placeholder="Announcing new arrivals..."
               disabled={loading || !isSuperAdmin}
             />
           </div>
-        ) : (
-          <div>
-            <label htmlFor="recipientType" className="block text-white text-sm font-medium mb-2">Send To</label>
-            <select
-              id="recipientType"
-              value={recipientType}
-              onChange={(e) => setRecipientType(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none"
-              disabled={loading || !isSuperAdmin}
-            >
-              <option value="all_users">All Users</option>
-              <option value="all_admins">All Admins</option>
-              <option value="all">All (Users & Admins)</option>
-            </select>
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="subject" className="block text-white text-sm font-medium mb-2">Subject</label>
-          <input
-            type="text"
-            id="subject"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none"
-            placeholder="Enter email subject"
-            disabled={loading || !isSuperAdmin}
-          />
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-white text-sm font-medium mb-2">Message (HTML supported)</label>
+          <label htmlFor="message" className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Content Manifest (Full HTML Enabled)</label>
           <textarea
             id="message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows="10"
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none resize-y"
-            placeholder="Enter your email content. Basic HTML tags like <p>, <strong>, <a> are supported."
+            className="w-full px-6 py-6 bg-stone-50 border border-gray-100 rounded-[2.5rem] text-gray-700 font-medium h-96 resize-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all leading-relaxed placeholder:text-gray-300"
+            placeholder="Structure your HTML content here. Standard tags are processed for rich formatting..."
             disabled={loading || !isSuperAdmin}
           ></textarea>
-          <p className="text-gray-500 text-xs mt-1">Tip: Use HTML tags for rich formatting.</p>
+          <div className="flex items-center space-x-2 mt-4 pl-2 opacity-50">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary-600"></div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">HTML 5.0 Engine Ready</p>
+          </div>
         </div>
 
         {isSuperAdmin ? (
           <button
             onClick={handleSendEmail}
-            className={`w-full px-4 py-3 rounded-lg text-black font-semibold transition-colors ${
-              loading ? 'bg-gray-600 cursor-not-allowed' : 'bg-bronze hover:bg-gold'
-            }`}
+            className={`w-full py-5 rounded-[2rem] text-white font-black uppercase tracking-[0.2em] text-xs transition-all shadow-xl shadow-primary-100 active:scale-[0.99] ${loading ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-primary-600 hover:bg-primary-700 shadow-primary-200 hover:shadow-primary-300'
+              }`}
             disabled={loading}
           >
-            {loading ? 'Sending...' : 'Send Email'}
+            {loading ? 'Processing Dispatch...' : 'Execute Dispatch'}
           </button>
         ) : (
-          <p className="text-red-400 text-center">Only Super Admins can send emails.</p>
+          <div className="p-6 bg-rose-50 rounded-3xl border border-rose-100 flex items-center justify-center space-x-3">
+            <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+            <p className="text-rose-700 text-xs font-black uppercase tracking-widest">Administrative overhead required for dispatch</p>
+          </div>
         )}
       </div>
     </div>

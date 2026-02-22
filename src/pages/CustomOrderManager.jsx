@@ -90,55 +90,84 @@ const CustomOrderManager = () => {
 
   if (loading) return (
     <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bronze"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
     </div>
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center space-x-3">
-          <ChatBubbleLeftRightIcon className="h-8 w-8 text-bronze" />
-          <span>Custom Order Management</span>
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center space-x-4">
+          <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+            <ChatBubbleLeftRightIcon className="h-8 w-8 text-primary-600" />
+          </div>
+          <span>Custom Commissions</span>
         </h1>
-        <p className="text-gray-400 mt-1">Manage custom art requests from customers</p>
+        <p className="text-gray-500 font-medium mt-1 pl-16">Monitor and manage bespoke sculpture requests from global patrons</p>
       </div>
 
       {/* Requests Grid */}
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {requests.length === 0 ? (
-          <div className="text-center py-12">
-            <ClockIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-400 mb-2">No Custom Order Requests</h3>
-            <p className="text-gray-500">There are no custom order requests to display.</p>
+          <div className="col-span-full text-center py-24 flex flex-col items-center bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+            <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-6">
+              <ClockIcon className="h-10 w-10 text-gray-300" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Registry Inactive</h3>
+            <p className="text-gray-500 font-medium">Commission requests will manifest here upon submission by patrons.</p>
           </div>
         ) : (
           requests.map((request) => (
-            <div key={request._id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700 hover:border-bronze/50 transition-all">
-              <div className="flex justify-between items-center mb-4">
+            <div key={request._id} className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-500 group relative">
+              <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h3 className="text-xl font-semibold text-white">Request from {request.user?.name || 'N/A'}</h3>
-                  <p className="text-gray-400 text-sm">{new Date(request.createdAt).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-2 py-0.5 rounded uppercase tracking-[0.2em]">New Commission</span>
+                    <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">{new Date(request.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 tracking-tight leading-tight">
+                    {request.user?.name || 'Patron Anonymous'}
+                  </h3>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
-                  {request.status.toUpperCase()}
-                </span>
+                <div className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm ${request.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                    request.status === 'quoted' ? 'bg-primary-50 text-primary-700 border-primary-100' :
+                      request.status === 'accepted' ? 'bg-green-50 text-green-700 border-green-100' :
+                        'bg-stone-100 text-gray-500 border-stone-200'
+                  }`}>
+                  {request.status}
+                </div>
               </div>
-              <p className="text-gray-300 mb-4 line-clamp-2">{request.requestDetails}</p>
-              {request.quotedPrice && (
-                <p className="text-bronze font-semibold mb-1">Quoted Price: ₹{request.quotedPrice.toLocaleString()}</p>
-              )}
-              {request.estimatedDeliveryDate && (
-                <p className="text-gray-400 text-sm">Estimated Delivery: {new Date(request.estimatedDeliveryDate).toLocaleDateString()}</p>
-              )}
-              <div className="flex justify-end mt-4">
+
+              <div className="bg-stone-50/50 p-6 rounded-3xl border border-gray-50 mb-8 overflow-hidden relative">
+                <p className="text-gray-600 font-medium text-sm leading-relaxed line-clamp-3">"{request.requestDetails || request.description}"</p>
+                <div className="absolute bottom-0 right-0 p-2 opacity-5">
+                  <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-900" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex gap-4">
+                  {request.quotedPrice && (
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Proposed Quote</span>
+                      <span className="text-primary-700 font-black text-lg tracking-tight">₹{request.quotedPrice.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {request.estimatedDeliveryDate && (
+                    <div className="flex flex-col border-l border-gray-100 pl-4">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected Release</span>
+                      <span className="text-gray-900 font-black text-sm tracking-tight">{new Date(request.estimatedDeliveryDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   onClick={() => viewRequestDetails(request)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                  className="bg-primary-600 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.1em] hover:bg-primary-700 transition-all shadow-lg shadow-primary-100 active:scale-95 flex items-center gap-3"
                 >
-                  <EyeIcon className="h-5 w-5" />
-                  <span>View Details</span>
+                  <EyeIcon className="h-4 w-4 stroke-[3px]" />
+                  Execute Review
                 </button>
               </div>
             </div>
@@ -148,193 +177,162 @@ const CustomOrderManager = () => {
 
       {/* Modal for Request Details and Update */}
       {showModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-700">
-            <div className="flex justify-between items-center p-6 border-b border-gray-800">
-              <h2 className="text-2xl font-bold text-white">Custom Order Request Details</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white transition-colors">
-                <XMarkIcon className="h-6 w-6" />
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-100 shadow-2xl flex flex-col scale-in-center">
+            <div className="flex justify-between items-center px-10 py-8 border-b border-gray-50 bg-stone-50/50">
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Commission Dossier</h2>
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Reviewing intent from {selectedRequest.user?.name}</p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-3 bg-white text-gray-400 hover:text-gray-900 rounded-2xl shadow-sm border border-gray-100 transition-all active:scale-95"
+              >
+                <XMarkIcon className="h-6 w-6 stroke-2" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <p className="text-gray-400"><strong>Requested by:</strong> {selectedRequest.user?.name} ({selectedRequest.user?.email})</p>
-                <p className="text-gray-400"><strong>Submitted on:</strong> {new Date(selectedRequest.createdAt).toLocaleString()}</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">Request Details:</h3>
-                <div className="bg-gray-800 p-4 rounded-lg space-y-3">
-                  {selectedRequest.sculptureType && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-gray-400 font-medium">Sculpture Type:</span>
-                        <p className="text-white">{selectedRequest.sculptureType}</p>
+
+            <div className="overflow-y-auto p-10 custom-scrollbar">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                {/* Left Column: Artifact Specifications */}
+                <div className="space-y-10">
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-amber-400 rounded-full"></div>
+                    Patron Requirements
+                  </h3>
+
+                  <div className="bg-stone-50/50 p-8 rounded-[2.5rem] border border-gray-50 space-y-8">
+                    <div className="grid grid-cols-2 gap-8">
+                      {[
+                        { label: 'Artifact Type', value: selectedRequest.sculptureType },
+                        { label: 'Medium', value: selectedRequest.material },
+                        { label: 'Scale Class', value: selectedRequest.size },
+                        { label: 'Color Theory', value: selectedRequest.color },
+                        { label: 'Economic Budget', value: selectedRequest.budget },
+                        { label: 'Temporal Limit', value: selectedRequest.timeline },
+                      ].map((spec, i) => spec.value && (
+                        <div key={i} className="flex flex-col">
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{spec.label}</span>
+                          <span className="text-gray-900 font-bold tracking-tight">{spec.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {(selectedRequest.height || selectedRequest.width || selectedRequest.depth) && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Precise Dimensions</span>
+                        <p className="text-gray-900 font-black text-lg tracking-tight">
+                          {selectedRequest.height && `${selectedRequest.height}″ H`}
+                          {selectedRequest.width && ` × ${selectedRequest.width}″ W`}
+                          {selectedRequest.depth && ` × ${selectedRequest.depth}″ D`}
+                        </p>
                       </div>
-                      <div>
-                        <span className="text-gray-400 font-medium">Material:</span>
-                        <p className="text-white">{selectedRequest.material}</p>
-                      </div>
+                    )}
+
+                    <div className="pt-4 border-t border-gray-100">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Manifesto / Description</span>
+                      <p className="text-gray-600 font-medium text-sm leading-relaxed whitespace-pre-line bg-white p-6 rounded-2xl border border-gray-50 shadow-inner">
+                        {selectedRequest.description || selectedRequest.requestDetails}
+                      </p>
                     </div>
-                  )}
-                  {selectedRequest.size && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-gray-400 font-medium">Size:</span>
-                        <p className="text-white">{selectedRequest.size}</p>
-                      </div>
-                      {(selectedRequest.height || selectedRequest.width || selectedRequest.depth) && (
-                        <div>
-                          <span className="text-gray-400 font-medium">Dimensions:</span>
-                          <p className="text-white">
-                            {selectedRequest.height && `${selectedRequest.height}H`}
-                            {selectedRequest.width && ` × ${selectedRequest.width}W`}
-                            {selectedRequest.depth && ` × ${selectedRequest.depth}D`}
-                            {(selectedRequest.height || selectedRequest.width || selectedRequest.depth) && ' inches'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {(selectedRequest.color || selectedRequest.finish) && (
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedRequest.color && (
-                        <div>
-                          <span className="text-gray-400 font-medium">Color:</span>
-                          <p className="text-white">{selectedRequest.color}</p>
-                        </div>
-                      )}
-                      {selectedRequest.finish && (
-                        <div>
-                          <span className="text-gray-400 font-medium">Finish:</span>
-                          <p className="text-white">{selectedRequest.finish}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {(selectedRequest.budget || selectedRequest.timeline) && (
-                    <div className="grid grid-cols-2 gap-4">
-                      {selectedRequest.budget && (
-                        <div>
-                          <span className="text-gray-400 font-medium">Budget:</span>
-                          <p className="text-white">{selectedRequest.budget}</p>
-                        </div>
-                      )}
-                      {selectedRequest.timeline && (
-                        <div>
-                          <span className="text-gray-400 font-medium">Timeline:</span>
-                          <p className="text-white">{selectedRequest.timeline}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {selectedRequest.description && (
-                    <div>
-                      <span className="text-gray-400 font-medium">Description:</span>
-                      <p className="text-white mt-1">{selectedRequest.description}</p>
-                    </div>
-                  )}
-                  {selectedRequest.specialRequirements && (
-                    <div>
-                      <span className="text-gray-400 font-medium">Special Requirements:</span>
-                      <p className="text-white mt-1">{selectedRequest.specialRequirements}</p>
-                    </div>
-                  )}
-                  {!selectedRequest.sculptureType && (
-                    <p className="text-gray-300">{selectedRequest.requestDetails}</p>
-                  )}
-                </div>
-              </div>
-              {selectedRequest.images && selectedRequest.images.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Images:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedRequest.images.map((img, index) => (
-                      <img key={index} src={img.url} alt="Request Image" className="w-32 h-32 object-cover rounded-lg border border-gray-700" />
-                    ))}
                   </div>
+
+                  {selectedRequest.images && selectedRequest.images.length > 0 && (
+                    <div className="space-y-6">
+                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Visonal References</h4>
+                      <div className="grid grid-cols-4 gap-4">
+                        {selectedRequest.images.map((img, index) => (
+                          <img key={index} src={img.url} alt="Reference" className="w-full aspect-square object-cover rounded-2xl border border-gray-100 shadow-sm hover:scale-105 transition-transform" />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              <div className="space-y-4 pt-4 border-t border-gray-800">
-                <h3 className="text-xl font-semibold text-white">Update Status & Quote:</h3>
-                <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-bronze focus:outline-none"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="quoted">Quoted</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="quotedPrice" className="block text-sm font-medium text-gray-300 mb-2">Quoted Price (₹)</label>
-                  <input
-                    type="number"
-                    id="quotedPrice"
-                    name="quotedPrice"
-                    value={formData.quotedPrice}
-                    onChange={(e) => setFormData({ ...formData, quotedPrice: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-bronze focus:outline-none"
-                    placeholder="Enter quoted price"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="estimatedDeliveryDate" className="block text-sm font-medium text-gray-300 mb-2">Estimated Delivery Date</label>
-                  <input
-                    type="date"
-                    id="estimatedDeliveryDate"
-                    name="estimatedDeliveryDate"
-                    value={formData.estimatedDeliveryDate}
-                    onChange={(e) => setFormData({ ...formData, estimatedDeliveryDate: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-bronze focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="adminNotes" className="block text-sm font-medium text-gray-300 mb-2">Admin Notes</label>
-                  <textarea
-                    id="adminNotes"
-                    name="adminNotes"
-                    value={formData.adminNotes}
-                    onChange={(e) => setFormData({ ...formData, adminNotes: e.target.value })}
-                    rows="4"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-bronze focus:outline-none resize-y"
-                    placeholder="Add internal notes or customer communication details."
-                  ></textarea>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="sendEmail"
-                    name="sendEmail"
-                    checked={formData.sendEmail}
-                    onChange={(e) => setFormData({ ...formData, sendEmail: e.target.checked })}
-                    className="mr-2"
-                  />
-                  <label htmlFor="sendEmail" className="text-sm font-medium text-gray-300">Send email to customer with update</label>
-                </div>
-                <div className="flex justify-end space-x-4 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleUpdate}
-                    className="px-4 py-2 bg-bronze text-black rounded-lg hover:bg-gold transition-colors"
-                  >
-                    Save & Update
-                  </button>
+
+                {/* Right Column: Administrative Controls */}
+                <div className="space-y-10">
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-primary-600 rounded-full"></div>
+                    Strategic Update
+                  </h3>
+
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-inner space-y-8">
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Operational Status</label>
+                        <select
+                          value={formData.status}
+                          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                          className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all appearance-none cursor-pointer"
+                        >
+                          {['pending', 'reviewed', 'quoted', 'accepted', 'rejected', 'completed'].map(s => (
+                            <option key={s} value={s}>{s.toUpperCase()}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Financial Quote (₹)</label>
+                          <input
+                            type="number"
+                            value={formData.quotedPrice}
+                            onChange={(e) => setFormData({ ...formData, quotedPrice: e.target.value })}
+                            className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-gray-300"
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Estimated Dispatch</label>
+                          <input
+                            type="date"
+                            value={formData.estimatedDeliveryDate}
+                            onChange={(e) => setFormData({ ...formData, estimatedDeliveryDate: e.target.value })}
+                            className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Director's Notes (Internal / Narrative)</label>
+                        <textarea
+                          value={formData.adminNotes}
+                          onChange={(e) => setFormData({ ...formData, adminNotes: e.target.value })}
+                          rows="5"
+                          className="w-full px-6 py-6 bg-stone-50 border border-gray-100 rounded-[2rem] text-gray-700 font-medium h-40 resize-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all leading-relaxed"
+                          placeholder="Document internal deliberations or communication details..."
+                        />
+                      </div>
+
+                      <div className="flex items-center px-2 py-4 bg-primary-50/30 rounded-2xl border border-primary-50">
+                        <label className="relative inline-flex items-center cursor-pointer ml-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.sendEmail}
+                            onChange={(e) => setFormData({ ...formData, sendEmail: e.target.checked })}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                          <span className="ml-4 text-[10px] font-black uppercase tracking-widest text-primary-900">Notify Patron via Email</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-4 pt-6">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 py-5 bg-stone-100 text-gray-600 font-black rounded-3xl hover:bg-stone-200 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                    >
+                      Discard
+                    </button>
+                    <button
+                      onClick={handleUpdate}
+                      className="flex-1 py-5 bg-primary-600 text-white font-black rounded-3xl hover:bg-primary-700 shadow-xl shadow-primary-100 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                    >
+                      Execute Protocol
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

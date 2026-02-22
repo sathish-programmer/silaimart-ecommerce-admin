@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-black text-white;
+    @apply bg-stone-50 text-gray-900 antialiased;
   }
 }
 
@@ -12,15 +12,15 @@
   .text-bronze {
     color: #CD7F32;
   }
-  
+
   .bg-bronze {
     background-color: #CD7F32;
   }
-  
+
   .border-bronze {
     border-color: #CD7F32;
   }
-  
+
   .hover\:bg-bronze:hover {
     background-color: #CD7F32;
   }

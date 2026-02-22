@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DocumentTextIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
 import { useAuthStore } from '../store/authStore';
@@ -74,7 +74,7 @@ const Policies = () => {
           ...formData
         })
       });
-      
+
       toast.success('Policy updated successfully');
       setEditingPolicy(null);
       fetchPolicies();
@@ -92,73 +92,82 @@ const Policies = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bronze"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-10">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center space-x-3">
-          <DocumentTextIcon className="h-8 w-8 text-bronze" />
-          <span>Policies & Terms</span>
-        </h1>
-        <p className="text-gray-400 mt-1">Manage your store policies and terms</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center space-x-4">
+            <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+              <DocumentTextIcon className="h-8 w-8 text-primary-600" />
+            </div>
+            <span>Legal & Policies</span>
+          </h1>
+          <p className="text-gray-500 font-medium mt-1 pl-16">Institutionalize your store's governance and trust standards</p>
+        </div>
       </div>
 
       {/* Policies Grid */}
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 gap-10">
         {policyTypes.map((policyType) => {
           const policy = policies.find(p => p.type === policyType.type);
           const isEditing = editingPolicy === policyType.type;
 
           return (
-            <div key={policyType.type} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{policyType.icon}</span>
+            <div key={policyType.type} className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative group overflow-hidden">
+              <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-125 transition-transform duration-700 pointer-events-none">
+                <span className="text-9xl">{policyType.icon}</span>
+              </div>
+              <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 relative z-10">
+                <div className="flex items-center space-x-6">
+                  <div className="text-4xl p-4 bg-stone-50 rounded-3xl group-hover:bg-primary-50 transition-colors">{policyType.icon}</div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white">{policyType.label}</h3>
-                    <p className="text-gray-400 text-sm">
-                      {policy ? `Last updated: ${new Date(policy.lastUpdated).toLocaleDateString()}` : 'Not configured'}
+                    <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-1">{policyType.label}</h3>
+                    <p className="text-gray-400 font-bold text-xs uppercase tracking-widest pl-1">
+                      {policy ? `Updated: ${new Date(policy.lastUpdated).toLocaleDateString(undefined, { dateStyle: 'medium' })}` : 'Not Configured'}
                     </p>
                   </div>
                 </div>
-                
-                <div className="flex items-center space-x-2">
+
+                <div className="flex items-center space-x-4">
                   {policy && (
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      policy.isActive ? 'bg-green-900/20 text-green-400' : 'bg-red-900/20 text-red-400'
-                    }`}>
-                      {policy.isActive ? 'Active' : 'Inactive'}
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${policy.isActive ? 'bg-green-50 text-green-700 border-green-100' : 'bg-rose-50 text-rose-700 border-rose-100 shadow-sm'
+                      }`}>
+                      {policy.isActive ? 'Active live' : 'Offline'}
                     </span>
                   )}
-                  
+
                   {!isEditing ? (
                     isSuperAdmin && (
                       <button
                         onClick={() => handleEdit(policyType.type)}
-                        className="p-2 bg-bronze hover:bg-gold text-black rounded-lg transition-colors"
+                        className="bg-primary-50 text-primary-600 p-3.5 rounded-2xl hover:bg-primary-600 hover:text-white transition-all shadow-sm active:scale-95"
+                        title="Modify Content"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <PencilIcon className="h-5 w-5 stroke-2" />
                       </button>
                     )
                   ) : (
                     isSuperAdmin && (
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         <button
                           onClick={handleSave}
-                          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                          className="bg-green-500 text-white p-3.5 rounded-2xl hover:bg-green-600 shadow-lg shadow-green-100 transition-all active:scale-95"
+                          title="Save Changes"
                         >
-                          <CheckIcon className="h-4 w-4" />
+                          <CheckIcon className="h-5 w-5 stroke-[3px]" />
                         </button>
                         <button
                           onClick={handleCancel}
-                          className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                          className="bg-stone-100 text-gray-400 p-3.5 rounded-2xl hover:bg-stone-200 hover:text-gray-900 transition-all active:scale-95"
+                          title="Discard Edits"
                         >
-                          ✕
+                          <XMarkIcon className="h-5 w-5 stroke-2" />
                         </button>
                       </div>
                     )
@@ -167,54 +176,65 @@ const Policies = () => {
               </div>
 
               {isEditing ? (
-                <div className="space-y-4">
+                <div className="space-y-8 relative z-10">
                   <div>
-                    <label className="block text-white mb-2">Title</label>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Document Title</label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none"
+                      className="w-full px-5 py-4 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 font-black focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                       disabled={!isSuperAdmin}
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-white mb-2">Content</label>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Legal Content (HTML Supported)</label>
                     <textarea
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-bronze focus:outline-none h-64 resize-none"
-                      placeholder="Enter policy content... You can use HTML tags for formatting."
+                      className="w-full px-6 py-6 bg-stone-50 border border-gray-100 rounded-[2.5rem] text-gray-700 font-medium h-96 resize-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all leading-relaxed"
+                      placeholder="Start drafting your institutional policies..."
                       disabled={!isSuperAdmin}
                     />
-                    <p className="text-gray-500 text-xs mt-1">
-                      Tip: Use HTML tags like &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt; for formatting
-                    </p>
+                    <div className="flex items-center space-x-4 mt-4 pl-4 text-gray-400">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Syntax Guide:</span>
+                      <code className="text-[10px] bg-stone-100 px-2 py-0.5 rounded">&lt;h3&gt;</code>
+                      <code className="text-[10px] bg-stone-100 px-2 py-0.5 rounded">&lt;p&gt;</code>
+                      <code className="text-[10px] bg-stone-100 px-2 py-0.5 rounded">&lt;ul&gt;</code>
+                      <code className="text-[10px] bg-stone-100 px-2 py-0.5 rounded">&lt;strong&gt;</code>
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="flex items-center text-white">
+
+                  <div className="bg-stone-50 p-6 rounded-[2rem] flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-900 font-black text-sm uppercase tracking-widest">Document Status</p>
+                      <p className="text-gray-500 text-xs font-medium">Control live visibility on consumer portal</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
                         checked={formData.isActive}
                         onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                        className="mr-3"
+                        className="sr-only peer"
                         disabled={!isSuperAdmin}
                       />
-                      Active
+                      <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-600 shadow-inner"></div>
                     </label>
                   </div>
                 </div>
               ) : (
-                <div className="bg-gray-800 rounded-lg p-4">
+                <div className="bg-stone-100/50 rounded-[2.5rem] p-8 border border-gray-50/50 group-hover:bg-white transition-colors duration-500 relative z-10">
                   {policy ? (
-                    <div 
-                      className="text-gray-300 text-sm max-h-32 overflow-y-auto"
-                      dangerouslySetInnerHTML={{ __html: policy.content.substring(0, 300) + '...' }}
+                    <div
+                      className="text-gray-600 font-medium text-sm max-h-48 overflow-y-auto leading-relaxed scrollbar-hide"
+                      dangerouslySetInnerHTML={{ __html: policy.content.substring(0, 450) + '...' }}
                     />
                   ) : (
-                    <p className="text-gray-500 text-sm italic">No content configured yet. Click edit to add content.</p>
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 font-bold italic tracking-wide">Institutional content pending configuration.</p>
+                      <p className="text-gray-300 text-xs mt-2 uppercase tracking-widest">Click the pencil icon to begin</p>
+                    </div>
                   )}
                 </div>
               )}

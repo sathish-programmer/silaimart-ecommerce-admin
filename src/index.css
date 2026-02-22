@@ -4,7 +4,29 @@
 
 @layer base {
   body {
-    @apply bg-stone-50 text-gray-900 antialiased;
+    @apply bg-stone-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-primary-100 hover:shadow-xl hover:shadow-primary-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-outline {
+    @apply px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-2xl font-bold text-sm hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-[0.98] disabled:opacity-50;
+  }
+
+  .card-premium {
+    @apply bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-500;
+  }
+
+  .input-premium {
+    @apply w-full px-5 py-3 bg-white border border-gray-200 rounded-2xl text-gray-900 text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:outline-none transition-all placeholder-gray-400;
+  }
+
+  .section-title {
+    @apply text-2xl font-black text-gray-900 tracking-tight mb-6;
   }
 }
 
@@ -24,4 +46,9 @@
   .hover\:bg-bronze:hover {
     background-color: #CD7F32;
   }
+}
+
+:root {
+  --primary-color: #7C3AED;
+  --accent-color: #CD7F32;
 }

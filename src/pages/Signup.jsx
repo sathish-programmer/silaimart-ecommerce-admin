@@ -27,10 +27,10 @@ const Signup = () => {
         name: data.name,
         email: data.email,
         password: data.password,
-        role: 'admin'
+        role: data.role || 'admin'
       });
 
-      toast.success('Admin account created successfully! Please login.');
+      toast.success(`${data.role === 'superadmin' ? 'Super Admin' : 'Admin'} account created successfully! Please login.`);
       // Redirect to login
       window.location.href = '/login';
     } catch (error) {
@@ -90,6 +90,23 @@ const Signup = () => {
                 />
                 {errors.email && (
                   <p className="mt-2 text-sm text-red-500 font-medium">{errors.email.message}</p>
+                )}
+              </div>
+
+              {/* Role */}
+              <div>
+                <label htmlFor="role" className="block text-sm font-bold text-gray-700 mb-2">
+                  Account Role
+                </label>
+                <select
+                  {...register('role', { required: 'Role is required' })}
+                  className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-2xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 focus:outline-none transition-all appearance-none cursor-pointer"
+                >
+                  <option value="admin">Administrator</option>
+                  <option value="superadmin">Super Administrator</option>
+                </select>
+                {errors.role && (
+                  <p className="mt-2 text-sm text-red-500 font-medium">{errors.role.message}</p>
                 )}
               </div>
 

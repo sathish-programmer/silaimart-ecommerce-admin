@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -10,11 +10,35 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', image: { url: '', alt: '' } });
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          image: {
+            url: e.target.result,
+            alt: file.name
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: { url: '', alt: '' }
+    }));
+  };
 
   const fetchCategories = async () => {
     try {
@@ -48,7 +72,7 @@ const Categories = () => {
 
       setShowModal(false);
       setEditCategory(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', image: { url: '', alt: '' } });
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
@@ -74,7 +98,15 @@ const Categories = () => {
 
   const openModal = (category = null) => {
     setEditCategory(category);
-    setFormData(category ? { name: category.name, description: category.description || '' } : { name: '', description: '' });
+    setFormData(category ? {
+      name: category.name,
+      description: category.description || '',
+      image: category.image || { url: '', alt: '' }
+    } : {
+      name: '',
+      description: '',
+      image: { url: '', alt: '' }
+    });
     setShowModal(true);
   };
 
@@ -100,8 +132,13 @@ const Categories = () => {
         {Array.isArray(categories) && categories.map((category) => (
           <div key={category._id} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 group">
             <div className="flex justify-between items-start mb-6">
-              <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center group-hover:bg-primary-600 transition-colors duration-300">
-                <PlusIcon className="h-6 w-6 text-primary-600 group-hover:text-white transition-colors" />
+              <div className="w-full h-48 bg-stone-50 rounded-2xl overflow-hidden mb-6 border border-gray-50 flex items-center justify-center relative group/img">
+                {category.image?.url ? (
+                  <img src={category.image.url} alt={category.name} className="w-full h-full object-cover" />
+                ) : (
+                  <PhotoIcon className="h-10 w-10 text-gray-200" />
+                )}
+                <div className="absolute inset-0 bg-primary-600/0 group-hover/img:bg-primary-600/10 transition-all duration-300" />
               </div>
               <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
@@ -146,7 +183,7 @@ const Categories = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl border border-gray-100">
+          <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
             <div className="flex justify-between items-center mb-10">
               <h2 className="text-3xl font-black text-gray-900 tracking-tight">
                 {editCategory ? 'Edit Type' : 'New Type'}
@@ -170,6 +207,40 @@ const Categories = () => {
                   required
                 />
               </div>
+              <div>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Collection Image</label>
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-stone-200 rounded-3xl p-8 bg-stone-50 group hover:border-primary-300 hover:bg-primary-50/10 transition-all duration-300">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="category-image"
+                    />
+                    <label
+                      htmlFor="category-image"
+                      className="flex flex-col items-center justify-center cursor-pointer p-2 group"
+                    >
+                      <PhotoIcon className="h-10 w-10 text-gray-300 mb-2 group-hover:text-primary-500 transition-colors" />
+                      <span className="text-gray-500 font-black text-[10px] uppercase tracking-widest">Upload Cover</span>
+                    </label>
+                  </div>
+                  {formData.image?.url && (
+                    <div className="relative rounded-2xl overflow-hidden border border-gray-100 aspect-video">
+                      <img src={formData.image.url} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors shadow-lg"
+                      >
+                        <XMarkIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Description</label>
                 <textarea

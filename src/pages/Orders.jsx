@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { EyeIcon, CheckCircleIcon, TruckIcon, XCircleIcon, ClockIcon, CreditCardIcon, BanknotesIcon, QrCodeIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, CheckCircleIcon, TruckIcon, XCircleIcon, ClockIcon, CreditCardIcon, BanknotesIcon, QrCodeIcon, PhotoIcon, PhoneIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
 
@@ -152,91 +152,71 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* Orders Grid */}
-      <div className="grid gap-6">
+      {/* Orders List */}
+      <div className="space-y-4">
         {filteredOrders.map((order) => (
-          <div key={order._id} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300 group">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex items-center space-x-6">
-                <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
-                  <span className="text-primary-700 font-black">#{order.orderNumber?.slice(-4) || order._id.slice(-4)}</span>
+          <div key={order._id} className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all duration-300 group">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+              {/* Order ID & Customer */}
+              <div className="flex items-center gap-5 min-w-[300px]">
+                <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
+                  <span className="text-[10px] font-black uppercase tracking-tighter">#{order.orderNumber?.slice(-4) || order._id.slice(-4)}</span>
                 </div>
-                <div>
-                  <h3 className="text-gray-900 text-xl font-black tracking-tight">{order.user?.name || 'Unknown Customer'}</h3>
-                  <p className="text-gray-500 font-medium">{order.user?.email}</p>
-                  <p className="text-gray-400 text-sm mt-1">{new Date(order.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-black text-gray-900 tracking-tighter">₹{order.total?.toLocaleString() || '0'}</p>
-                <div className="flex items-center justify-end space-x-2 mt-2">
-                  <div className="p-1.5 bg-stone-50 rounded-lg text-gray-400">
-                    {getPaymentIcon(order.paymentMethod)}
+                <div className="min-w-0">
+                  <h3 className="text-gray-900 font-black truncate">{order.user?.name || 'Unknown Customer'}</h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-gray-400 text-[10px] font-medium truncate">{order.user?.email}</p>
+                    <span className="text-gray-200">•</span>
+                    <p className="text-gray-400 text-[10px] font-bold">{new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
                   </div>
-                  <span className="text-gray-500 text-sm font-bold uppercase tracking-wider">{order.paymentMethod}</span>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <span className={`px-4 py-1.5 rounded-full text-xs font-black border ${getStatusColor(order.orderStatus)}`}>
-                  {order.orderStatus?.toUpperCase()}
-                </span>
-                <span className={`px-4 py-1.5 rounded-full text-xs font-black border ${getPaymentStatusColor(order.paymentStatus)}`}>
-                  {order.paymentStatus?.toUpperCase()}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => viewOrderDetails(order._id)}
-                  className="p-3 bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white rounded-xl transition-all duration-300 shadow-sm"
-                  title="View Details"
-                >
-                  <EyeIcon className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
+              {/* Items & Payment */}
+              <div className="flex-1 flex items-center justify-between gap-8 border-t lg:border-t-0 lg:border-l border-gray-50 pt-4 lg:pt-0 lg:pl-8">
+                <div className="flex items-center gap-8">
+                  <div className="hidden sm:block">
+                    <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] mb-1">Status</p>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${getStatusColor(order.orderStatus)}`}>
+                      {order.orderStatus}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] mb-1">Payment</p>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${order.paymentStatus === 'paid' ? 'bg-green-500' : 'bg-amber-500'}`} />
+                      <span className="text-gray-700 text-[10px] font-bold uppercase tracking-wide">{order.paymentMethod}</span>
+                    </div>
+                  </div>
+                  <div className="hidden xl:block">
+                    <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] mb-1">Volume</p>
+                    <p className="text-gray-900 text-[10px] font-bold">{order.items?.length || 0} sacred item(s)</p>
+                  </div>
+                </div>
 
-            {/* Quick Actions */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-50 group-hover:border-primary-100 transition-colors">
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-400 text-xs font-black uppercase tracking-widest mr-2">Quick Actions:</span>
+                <div className="text-right">
+                  <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.2em] mb-0.5">Total Revenue</p>
+                  <p className="text-xl font-black text-gray-900 tracking-tighter">₹{order.total?.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-50 pt-4 lg:pt-0 lg:pl-8 min-w-[150px]">
                 {order.orderStatus === 'pending' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, 'confirmed')}
-                    className="px-4 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-all duration-200"
-                  >
-                    Confirm
+                  <button onClick={() => updateOrderStatus(order._id, 'confirmed')}
+                    className="p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm" title="Confirm Order">
+                    <CheckCircleIcon className="h-4 w-4" />
                   </button>
                 )}
-                {order.orderStatus === 'confirmed' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, 'processing')}
-                    className="px-4 py-1.5 bg-violet-50 text-violet-700 hover:bg-violet-600 hover:text-white rounded-lg text-xs font-bold transition-all duration-200"
-                  >
-                    Process
+                <button onClick={() => viewOrderDetails(order._id)}
+                  className="p-2.5 bg-primary-50 text-primary-600 hover:bg-primary-600 hover:text-white rounded-xl transition-all shadow-sm" title="View Details">
+                  <EyeIcon className="h-4 w-4" />
+                </button>
+                {order.orderStatus !== 'delivered' && order.orderStatus !== 'cancelled' && (
+                  <button className="p-2.5 bg-stone-50 text-gray-400 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-all shadow-sm">
+                    <ArrowPathIcon className="h-4 w-4" />
                   </button>
                 )}
-                {order.orderStatus === 'processing' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, 'shipped')}
-                    className="px-4 py-1.5 bg-primary-50 text-primary-700 hover:bg-primary-600 hover:text-white rounded-lg text-xs font-bold transition-all duration-200"
-                  >
-                    Ship
-                  </button>
-                )}
-                {order.paymentMethod === 'qr' && order.paymentStatus === 'pending' && (
-                  <button
-                    onClick={() => updateOrderStatus(order._id, order.orderStatus, 'paid')}
-                    className="px-4 py-1.5 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white rounded-lg text-xs font-bold transition-all duration-200"
-                  >
-                    Confirm Payment
-                  </button>
-                )}
-              </div>
-              <div className="text-gray-500 text-sm font-bold bg-stone-50 px-3 py-1 rounded-lg">
-                {order.items?.length || 0} item(s)
               </div>
             </div>
           </div>
@@ -475,36 +455,36 @@ const Orders = () => {
               </div>
 
               {/* Pricing */}
-              <div className="bg-gray-900 rounded-[2rem] p-8 shadow-xl shadow-gray-200">
-                <h3 className="text-xl font-bold text-white mb-6 uppercase text-xs tracking-[0.2em]">Order Summary</h3>
+              <div className="bg-stone-50 rounded-[2rem] p-8 border border-gray-100">
+                <h3 className="text-xl font-bold text-gray-900 mb-6 uppercase text-xs tracking-[0.2em]">Order Summary</h3>
                 <div className="space-y-4">
-                  <div className="flex justify-between text-gray-400 font-medium">
+                  <div className="flex justify-between text-gray-500 font-medium">
                     <span>Subtotal</span>
-                    <span className="text-white">₹{selectedOrder.subtotal?.toLocaleString()}</span>
+                    <span className="text-gray-900 font-black">₹{selectedOrder.subtotal?.toLocaleString()}</span>
                   </div>
                   {selectedOrder.discount > 0 && (
-                    <div className="flex justify-between text-rose-400 font-medium">
+                    <div className="flex justify-between text-rose-500 font-medium">
                       <span>Coupon Discount</span>
-                      <span>-₹{selectedOrder.discount?.toLocaleString()}</span>
+                      <span className="font-black">-₹{selectedOrder.discount?.toLocaleString()}</span>
                     </div>
                   )}
                   {selectedOrder.loyaltyDiscount > 0 && (
-                    <div className="flex justify-between text-amber-400 font-medium">
+                    <div className="flex justify-between text-amber-600 font-medium">
                       <span>Loyalty Discount ({selectedOrder.loyaltyPointsUsed} pts)</span>
-                      <span>-₹{selectedOrder.loyaltyDiscount?.toLocaleString()}</span>
+                      <span className="font-black">-₹{selectedOrder.loyaltyDiscount?.toLocaleString()}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-gray-400 font-medium">
+                  <div className="flex justify-between text-gray-500 font-medium">
                     <span>Shipping</span>
-                    <span className="text-white">{selectedOrder.shippingCost === 0 ? 'FREE' : `₹${selectedOrder.shippingCost}`}</span>
+                    <span className="text-gray-900 font-black">{selectedOrder.shippingCost === 0 ? 'FREE' : `₹${selectedOrder.shippingCost}`}</span>
                   </div>
-                  <div className="flex justify-between text-gray-400 font-medium">
+                  <div className="flex justify-between text-gray-500 font-medium">
                     <span>Tax (GST)</span>
-                    <span className="text-white">₹{selectedOrder.tax?.toLocaleString()}</span>
+                    <span className="text-gray-900 font-black">₹{selectedOrder.tax?.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-2xl font-black text-white border-t border-gray-800 pt-6 mt-2">
+                  <div className="flex justify-between text-2xl font-black text-gray-900 border-t border-gray-200 pt-6 mt-2">
                     <span className="tracking-tight uppercase text-xs self-center text-gray-500">Total Amount</span>
-                    <span className="text-amber-500 tracking-tighter">₹{selectedOrder.total?.toLocaleString()}</span>
+                    <span className="text-primary-600 tracking-tighter">₹{selectedOrder.total?.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -650,8 +630,8 @@ const Orders = () => {
                     }
                   }}
                   className={`px-6 py-3.5 rounded-2xl font-bold transition-all text-white shadow-lg ${paymentAction === 'refunded'
-                      ? 'bg-primary-600 hover:bg-primary-700 shadow-primary-100'
-                      : 'bg-rose-600 hover:bg-rose-700 shadow-rose-100'
+                    ? 'bg-primary-600 hover:bg-primary-700 shadow-primary-100'
+                    : 'bg-rose-600 hover:bg-rose-700 shadow-rose-100'
                     }`}
                 >
                   {paymentAction === 'refunded' ? 'Confirm Refund' : 'Reject Payment'}

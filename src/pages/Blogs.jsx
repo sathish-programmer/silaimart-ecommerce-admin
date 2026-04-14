@@ -12,13 +12,22 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
+import RichTextEditor from '../components/RichTextEditor';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [selectingBlog, setSelectingBlog] = useState(null);
+  const [editBlog, setEditBlog] = useState(null);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    featuredImage: { url: '', alt: '' },
+    isPublished: false
+  });
 
   useEffect(() => {
     fetchBlogs();
@@ -49,9 +58,88 @@ const Blogs = () => {
       if (response.ok) {
         toast.success('Blog post removed');
         fetchBlogs();
+      } else {
+        toast.error('Failed to delete blog');
       }
     } catch (error) {
       toast.error('Failed to delete blog');
+    }
+  };
+
+  const openModal = (blog = null) => {
+    setEditBlog(blog);
+    if (blog) {
+      setFormData({
+        title: blog.title || '',
+        content: blog.content || '',
+        excerpt: blog.excerpt || '',
+        featuredImage: blog.featuredImage || { url: '', alt: '' },
+        isPublished: blog.isPublished || false
+      });
+    } else {
+      setFormData({
+        title: '',
+        content: '',
+        excerpt: '',
+        featuredImage: { url: '', alt: '' },
+        isPublished: false
+      });
+    }
+    setShowModal(true);
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: {
+            url: e.target.result,
+            alt: file.name
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      featuredImage: { url: '', alt: '' }
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.title || !formData.content) {
+      return toast.error('Title and content are required');
+    }
+
+    try {
+      const endpoint = editBlog ? `/admin/blogs/${editBlog._id}` : '/admin/blogs';
+      const method = editBlog ? 'PUT' : 'POST';
+
+      const response = await apiCall(endpoint, {
+        method,
+        body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(editBlog ? 'Blog updated successfully' : 'Blog created successfully');
+        setShowModal(false);
+        setEditBlog(null);
+        fetchBlogs();
+      } else {
+        toast.error(data.message || 'Failed to save blog');
+      }
+    } catch (error) {
+      console.error('Error saving blog:', error);
+      toast.error('Failed to save blog');
     }
   };
 
@@ -67,14 +155,14 @@ const Blogs = () => {
   );
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in relative">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="section-title mb-1">Chronicles & Stories</h1>
           <p className="text-gray-500 font-medium">Curate the latest narratives and divine inspirations.</p>
         </div>
         <div className="flex gap-3">
-          <button className="btn-primary flex items-center gap-2">
+          <button onClick={() => openModal()} className="btn-primary flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
             New Chronicle
           </button>
@@ -114,9 +202,9 @@ const Blogs = () => {
                 </div>
               )}
               <div className="absolute top-4 right-4">
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm border ${blog.published ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm border ${blog.isPublished ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'
                   }`}>
-                  {blog.published ? 'Published' : 'Draft'}
+                  {blog.isPublished ? 'Published' : 'Draft'}
                 </span>
               </div>
             </div>
@@ -125,7 +213,7 @@ const Blogs = () => {
                 {blog.title}
               </h3>
               <p className="text-gray-500 text-xs font-medium mb-6 line-clamp-3 leading-relaxed">
-                {blog.summary || blog.content?.replace(/<[^>]*>/g, '').slice(0, 120) + '...'}
+                {blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').slice(0, 120) + '...'}
               </p>
 
               <div className="flex items-center justify-between pt-6 border-t border-gray-50">
@@ -140,7 +228,7 @@ const Blogs = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
+                  <button onClick={() => openModal(blog)} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
                     <PencilIcon className="h-4 w-4" />
                   </button>
                   <button onClick={() => deleteBlog(blog._id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
@@ -157,6 +245,122 @@ const Blogs = () => {
           </div>
         )}
       </div>
+
+      {/* Modal for Creating / Editing Blog */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-8">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                {editBlog ? 'Edit Chronicle' : 'New Chronicle'}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <XMarkIcon className="h-6 w-6 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Title *</label>
+                    <input
+                      type="text"
+                      className="input-premium w-full"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Excerpt</label>
+                    <textarea
+                      className="input-premium w-full h-24 resize-none"
+                      value={formData.excerpt}
+                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                      placeholder="A short summary of the blog post..."
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Content *</label>
+                    <div className="bg-stone-50 rounded-2xl overflow-hidden border border-gray-100">
+                      <RichTextEditor
+                        value={formData.content}
+                        onChange={(content) => setFormData({ ...formData, content })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Featured Image</label>
+                    <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center hover:border-primary-400 transition-colors bg-stone-50">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="blog-image"
+                      />
+                      <label htmlFor="blog-image" className="cursor-pointer flex flex-col items-center">
+                        <PhotoIcon className="h-10 w-10 text-gray-400 mb-2" />
+                        <span className="text-xs text-gray-500 font-medium">Click to upload image</span>
+                      </label>
+                    </div>
+
+                    {formData.featuredImage?.url && (
+                      <div className="mt-4 relative rounded-xl overflow-hidden aspect-video border border-gray-100">
+                        <img src={formData.featuredImage.url} alt="Preview" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg shadow-sm hover:bg-rose-600 transition-colors"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="flex items-center space-x-3 bg-stone-50 p-4 rounded-xl border border-gray-100 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.isPublished}
+                        onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
+                        className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm font-bold text-gray-700">Publish immediately</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-8"
+                >
+                  {editBlog ? 'Save Changes' : 'Create Chronicle'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -265,11 +265,47 @@ const Orders = () => {
                       <div className="pt-4 border-t border-gray-200/50">
                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 text-xs">Shipping Address</div>
                         <div className="text-sm text-gray-600 leading-relaxed font-medium">
+                          {selectedOrder.shippingAddress.name && <div className="font-bold text-gray-800 mb-1">{selectedOrder.shippingAddress.name}</div>}
                           {selectedOrder.shippingAddress.address || selectedOrder.shippingAddress.street},<br />
                           {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state}, {selectedOrder.shippingAddress.zipCode || selectedOrder.shippingAddress.pincode}
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  <div className="bg-stone-50 rounded-[2rem] p-6 border border-gray-100">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Payment Information</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 font-medium lowercase">Method</span>
+                        <div className="flex items-center gap-2">
+                          {selectedOrder.paymentMethod === 'razorpay' && <CreditCardIcon className="h-4 w-4 text-indigo-500" />}
+                          {selectedOrder.paymentMethod === 'cod' && <BanknotesIcon className="h-4 w-4 text-emerald-500" />}
+                          {selectedOrder.paymentMethod === 'qr' && <QrCodeIcon className="h-4 w-4 text-amber-500" />}
+                          <span className="text-sm font-black text-gray-900 uppercase">{selectedOrder.paymentMethod}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 font-medium lowercase">Status</span>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          selectedOrder.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {selectedOrder.paymentStatus}
+                        </span>
+                      </div>
+                      {selectedOrder.paymentId && (
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200/30">
+                          <span className="text-xs text-gray-500 font-medium lowercase">Transaction ID</span>
+                          <span className="text-[10px] font-mono font-bold text-gray-400 select-all">{selectedOrder.paymentId}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500 font-medium lowercase">Placed On</span>
+                        <span className="text-[10px] font-bold text-gray-600">
+                          {new Date(selectedOrder.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="bg-stone-50 rounded-[2rem] p-6 border border-gray-100">
@@ -371,10 +407,43 @@ const Orders = () => {
                         </div>
                       ))}
                     </div>
-                    <div className="pt-4 mt-4 border-t border-gray-200/50">
+                    <div className="pt-4 mt-4 border-t border-gray-200/50 space-y-2">
                       <div className="flex justify-between items-center px-2">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Total Revenue</span>
-                        <span className="text-xl font-black text-primary-600 tracking-tight">₹{selectedOrder.total?.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subtotal</span>
+                        <span className="text-sm font-bold text-gray-700">₹{selectedOrder.subtotal?.toLocaleString()}</span>
+                      </div>
+                      
+                      {selectedOrder.discount > 0 && (
+                        <div className="flex justify-between items-center px-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-rose-400">
+                            Discount {selectedOrder.coupon?.code ? `(${selectedOrder.coupon.code})` : ''}
+                          </span>
+                          <span className="text-sm font-bold text-rose-500">-₹{selectedOrder.discount?.toLocaleString()}</span>
+                        </div>
+                      )}
+
+                      {selectedOrder.loyaltyDiscount > 0 && (
+                        <div className="flex justify-between items-center px-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-primary-400">Loyalty Points</span>
+                          <span className="text-sm font-bold text-primary-500">-₹{selectedOrder.loyaltyDiscount?.toLocaleString()}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center px-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Tax / GST</span>
+                        <span className="text-sm font-bold text-gray-700">₹{selectedOrder.tax?.toLocaleString()}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center px-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Shipping</span>
+                        <span className="text-sm font-bold text-gray-700">
+                          {selectedOrder.shippingCost === 0 ? 'FREE' : `₹${selectedOrder.shippingCost?.toLocaleString()}`}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center px-2 pt-3 border-t border-gray-100">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-900">Final Total</span>
+                        <span className="text-2xl font-black text-primary-600 tracking-tight">₹{selectedOrder.total?.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>

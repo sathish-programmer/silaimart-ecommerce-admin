@@ -555,7 +555,7 @@ const Orders = () => {
                     </button>
                     <button
                       className="flex-1 btn-outline py-4 uppercase tracking-widest text-[10px] text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                      onClick={() => window.open(`${import.meta.env.VITE_API_URL}/orders/${selectedOrder._id}/invoice`, '_blank')}
+                      onClick={() => window.open(`${import.meta.env.VITE_API_URL}/orders/${selectedOrder._id}/invoice?token=${localStorage.getItem('token')}`, '_blank')}
                     >
                       Invoice
                     </button>

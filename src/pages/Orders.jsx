@@ -305,11 +305,36 @@ const Orders = () => {
                           {new Date(selectedOrder.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
                         </span>
                       </div>
-                    </div>
+                  </div>
                   </div>
 
                   <div className="bg-stone-50 rounded-[2rem] p-6 border border-gray-100">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Update Status</h3>
+                    
+                    {/* Refund Information Display */}
+                    {(selectedOrder.refundId || selectedOrder.paymentStatus === 'refunded') && (
+                      <div className="mb-4 bg-amber-50 rounded-2xl p-4 border border-amber-100 space-y-2">
+                        <div className="flex items-center gap-2 text-amber-800">
+                          <CheckCircleIcon className="h-4 w-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Refund Details</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-amber-700 uppercase tracking-tight">
+                          <span>Refund ID:</span>
+                          <span className="font-mono lowercase text-gray-600 truncate">{selectedOrder.refundId || 'N/A'}</span>
+                          <span>Amount:</span>
+                          <span className="text-gray-600">₹{selectedOrder.refundAmount?.toLocaleString()}</span>
+                          <span>Processed:</span>
+                          <span className="text-gray-600">{selectedOrder.refundAt ? new Date(selectedOrder.refundAt).toLocaleDateString() : 'N/A'}</span>
+                        </div>
+                        {selectedOrder.refundReason && (
+                          <div className="pt-2 border-t border-amber-200/50">
+                            <span className="block text-[8px] text-amber-600 mb-1">REASON:</span>
+                            <p className="text-[10px] text-gray-600 normal-case italic">"{selectedOrder.refundReason}"</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Order Status</label>
@@ -361,7 +386,7 @@ const Orders = () => {
                           onChange={(e) => setEditData({ ...editData, deliveryNotes: e.target.value })}
                         />
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <input
                             type="checkbox"
@@ -370,21 +395,94 @@ const Orders = () => {
                             checked={editData.sendEmail}
                             onChange={(e) => setEditData({ ...editData, sendEmail: e.target.checked })}
                           />
-                          <label htmlFor="sendEmail" className="text-[10px] font-black uppercase tracking-widest text-gray-400">Notify Customer</label>
+                          <label htmlFor="sendEmail" className="text-[10px] font-black uppercase tracking-widest text-gray-400">Notify</label>
                         </div>
-                        <button
-                          onClick={() => updateOrderStatus(selectedOrder._id, editData.orderStatus, editData.paymentStatus, editData.sendEmail, {
-                            estimatedDeliveryDate: editData.estimatedDeliveryDate,
-                            deliveryNotes: editData.deliveryNotes
-                          })}
-                          className="bg-primary-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-700 transition-all shadow-lg shadow-primary-100 active:scale-95"
-                        >
-                          Update Order
-                        </button>
+                        
+                        <div className="flex gap-2">
+                          {/* Cancel & Refund Button */}
+                          {selectedOrder.orderStatus !== 'cancelled' && selectedOrder.paymentStatus === 'paid' && selectedOrder.paymentMethod === 'razorpay' && (
+                            <button
+                              onClick={async () => {
+                                const reason = prompt('Please enter a reason for cancellation & refund:');
+                                if (!reason) return;
+                                
+                                try {
+                                  const response = await apiCall(`/orders/${selectedOrder._id}/cancel`, {
+                                    method: 'POST',
+                                    body: JSON.stringify({ reason })
+                                  });
+                                  
+                                  if (response.ok) {
+                                    toast.success('Refund initiated and order cancelled');
+                                    fetchOrders();
+                                    setShowModal(false);
+                                  } else {
+                                    const error = await response.json();
+                                    toast.error(error.message || 'Cancellation failed');
+                                  }
+                                } catch (err) {
+                                  toast.error('Network error occurred');
+                                }
+                              }}
+                              className="bg-rose-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-100 active:scale-95"
+                            >
+                              Cancel & Refund
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => updateOrderStatus(selectedOrder._id, editData.orderStatus, editData.paymentStatus, editData.sendEmail, {
+                              estimatedDeliveryDate: editData.estimatedDeliveryDate,
+                              deliveryNotes: editData.deliveryNotes
+                            })}
+                            className="bg-primary-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-700 transition-all shadow-lg shadow-primary-100 active:scale-95"
+                          >
+                            Update
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                {/* Financial Details */}
+                <div className="bg-stone-50 rounded-[2rem] p-6 border border-gray-100 mb-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Financial Footprint</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Method</p>
+                      <p className="text-xs font-bold text-gray-900 uppercase">{selectedOrder.paymentMethod}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Status</p>
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                        selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 
+                        selectedOrder.paymentStatus === 'refunded' ? 'bg-amber-100 text-amber-700' :
+                        'bg-stone-200 text-stone-600'
+                      }`}>
+                        {selectedOrder.paymentStatus}
+                      </span>
+                    </div>
+                    {selectedOrder.paymentId && (
+                      <div className="col-span-2 space-y-1 pt-2 border-t border-gray-100">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Transaction ID (Razorpay)</p>
+                        <p className="text-[10px] font-mono text-gray-600 truncate">{selectedOrder.paymentId}</p>
+                      </div>
+                    )}
+                    {selectedOrder.refundId && (
+                      <div className="col-span-2 space-y-2 pt-2 border-t border-amber-100 bg-amber-50/30 p-2 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-amber-600">Refund ID</p>
+                          <p className="text-[10px] font-mono text-amber-700 truncate">{selectedOrder.refundId}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-amber-600">Refunded Amount</p>
+                          <p className="text-xs font-black text-amber-700">₹{selectedOrder.refundAmount?.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
 
                 {/* Items */}
                 <div className="space-y-6">
@@ -451,9 +549,9 @@ const Orders = () => {
                   <div className="flex gap-4">
                     <button
                       className="flex-1 btn-primary py-4 uppercase tracking-widest text-[10px]"
-                      onClick={() => toast.success('Updates synchronized')}
+                      onClick={() => setShowModal(false)}
                     >
-                      Update Order
+                      Close View
                     </button>
                     <button
                       className="flex-1 btn-outline py-4 uppercase tracking-widest text-[10px] text-rose-600 hover:text-rose-700 hover:bg-rose-50"

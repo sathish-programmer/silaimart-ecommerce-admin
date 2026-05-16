@@ -116,8 +116,8 @@ const Categories = () => {
     <div className="p-6 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Categories</h1>
-          <p className="text-gray-500 font-medium mt-1">Organize your sculptures by type and style</p>
+          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
+          <p className="text-gray-500 font-medium mt-1">Organize your products by type and style</p>
         </div>
         <button
           onClick={() => openModal()}
@@ -202,7 +202,7 @@ const Categories = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g. Bronze Sculptures"
+                  placeholder="e.g. Home Decor"
                   className="w-full bg-stone-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
                   required
                 />

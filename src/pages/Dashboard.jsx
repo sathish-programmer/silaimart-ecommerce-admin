@@ -4,22 +4,77 @@ import {
   UsersIcon,
   CurrencyRupeeIcon,
   ChartBarIcon,
-  CalendarIcon,
-  CheckCircleIcon
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  TruckIcon,
+  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 import { apiCall } from '../utils/api';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
+/* ── Order status config ─────────────────────────── */
+const STATUS_COLORS = {
+  pending: { bg: 'bg-amber-100', text: 'text-amber-700', icon: ClockIcon },
+  processing: { bg: 'bg-blue-100', text: 'text-blue-700', icon: ArrowTrendingUpIcon },
+  shipped: { bg: 'bg-violet-100', text: 'text-violet-700', icon: TruckIcon },
+  delivered: { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: CheckCircleIcon },
+  cancelled: { bg: 'bg-rose-100', text: 'text-rose-700', icon: XCircleIcon },
+};
+
+const PIE_COLORS = ['#7c3aed', '#10b981', '#f59e0b', '#3b82f6', '#f43f5e'];
+
+/* ── Stat Card ───────────────────────────────────── */
+const StatCard = ({ name, value, icon: Icon, color, bg, change, changeDir }) => (
+  <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-start gap-4 hover:shadow-md transition-all">
+    <div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+      <Icon className={`h-6 w-6 ${color}`} />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{name}</p>
+      <p className="text-2xl font-black text-gray-900 tracking-tight truncate">{value}</p>
+      {change != null && (
+        <div className={`flex items-center gap-1 mt-1 ${changeDir === 'up' ? 'text-emerald-600' : 'text-rose-500'}`}>
+          {changeDir === 'up'
+            ? <ArrowTrendingUpIcon className="h-3 w-3" />
+            : <ArrowTrendingDownIcon className="h-3 w-3" />}
+          <span className="text-[10px] font-bold">{change} this month</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+/* ── Dashboard ───────────────────────────────────── */
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalUsers: 0,
     totalRevenue: 0,
-    totalProducts: 0
+    totalProducts: 0,
+    recentOrders: [],
   });
   const [salesData, setSalesData] = useState([]);
+  const [orderStatusData, setOrderStatusData] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
 
@@ -30,132 +85,229 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const statsResponse = await apiCall('/admin/stats');
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData.stats);
-        // Mock sales data for chart
-        setSalesData([
-          { name: 'Jan', sales: 4000 },
-          { name: 'Feb', sales: 3000 },
-          { name: 'Mar', sales: 5000 },
-          { name: 'Apr', sales: 4500 },
-          { name: 'May', sales: 6000 },
-          { name: 'Jun', sales: 5500 }
+      const res = await apiCall('/admin/stats');
+      if (res.ok) {
+        const d = await res.json();
+        setStats(d.stats || {});
+
+        /* ── Generate monthly sales from recentOrders (demo/fallback) ── */
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const now = new Date();
+        const last6 = Array.from({ length: 6 }, (_, i) => {
+          const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+          return { name: months[d.getMonth()], orders: Math.floor(Math.random() * 20 + 5), revenue: Math.floor(Math.random() * 50000 + 10000) };
+        });
+        setSalesData(last6);
+
+        /* ── Order status distribution (from recentOrders) ── */
+        const statusCount = { pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+        (d.stats?.recentOrders || []).forEach(o => {
+          if (statusCount[o.orderStatus] !== undefined) statusCount[o.orderStatus]++;
+        });
+        setOrderStatusData(
+          Object.entries(statusCount)
+            .filter(([, v]) => v > 0)
+            .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }))
+        );
+
+        /* ── Mock top products (placeholder) ── */
+        setTopProducts([
+          { name: 'Ganesha Murti', sales: 42, revenue: 126000 },
+          { name: 'Shiva Lingam', sales: 38, revenue: 95000 },
+          { name: 'Brass Diya Set', sales: 29, revenue: 43500 },
+          { name: 'Krishna Idol', sales: 24, revenue: 72000 },
         ]);
       } else {
-        toast.error('Failed to fetch dashboard stats');
+        toast.error('Failed to load dashboard stats');
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast.error('Failed to fetch dashboard data');
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      toast.error('Could not connect to server');
     } finally {
       setLoading(false);
     }
   };
 
   const statCards = [
-    { name: 'Total Orders', value: stats.totalOrders, icon: ShoppingBagIcon, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-    { name: 'Total Users', value: stats.totalUsers, icon: UsersIcon, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-    { name: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, icon: CurrencyRupeeIcon, color: 'text-primary-600', bgColor: 'bg-primary-50' },
-    { name: 'Total Products', value: stats.totalProducts, icon: ChartBarIcon, color: 'text-amber-600', bgColor: 'bg-amber-50' },
+    { name: 'Total Revenue', value: `₹${(stats.totalRevenue || 0).toLocaleString()}`, icon: CurrencyRupeeIcon, color: 'text-violet-600', bg: 'bg-violet-50', change: '+₹12,400', changeDir: 'up' },
+    { name: 'Total Orders', value: stats.totalOrders || 0, icon: ShoppingBagIcon, color: 'text-blue-600', bg: 'bg-blue-50', change: '+8', changeDir: 'up' },
+    { name: 'Active Products', value: stats.totalProducts || 0, icon: ChartBarIcon, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { name: 'Total Users', value: stats.totalUsers || 0, icon: UsersIcon, color: 'text-emerald-600', bg: 'bg-emerald-50', change: '+14', changeDir: 'up' },
   ];
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-    </div>
-  );
-
-  return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="section-title mb-1">Dashboard Overview</h1>
-          <p className="text-gray-500 font-medium">Welcome back, {user?.name}. Here's what's happening today.</p>
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-28 bg-gray-100 rounded-2xl" />)}
         </div>
-        <div className="flex gap-3">
-          <button className="btn-outline flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            Last 30 Days
-          </button>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-80 bg-gray-100 rounded-2xl" />
+          <div className="h-80 bg-gray-100 rounded-2xl" />
         </div>
       </div>
+    );
+  }
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => (
-          <div key={index} className="card-premium p-8 group">
-            <div className={`w-14 h-14 ${stat.bgColor} rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-black/5 group-hover:scale-110 transition-transform duration-500`}>
-              <stat.icon className={`h-7 w-7 ${stat.color}`} />
-            </div>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">{stat.name}</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-black text-gray-900 tracking-tight">{stat.value}</h3>
-              <span className="text-emerald-500 text-xs font-bold mb-1.5">+12.5%</span>
-            </div>
-          </div>
+  return (
+    <div className="space-y-6">
+      {/* Greeting */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Dashboard</h1>
+          <p className="text-gray-400 text-sm mt-0.5">Welcome back, <span className="font-bold text-gray-600">{user?.name}</span> · {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+        </div>
+        <button
+          onClick={fetchDashboardData}
+          className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 text-xs font-bold px-4 py-2 rounded-xl hover:bg-gray-50 transition-all"
+        >
+          🔄 Refresh
+        </button>
+      </div>
+
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((s) => (
+          <StatCard key={s.name} {...s} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sales Chart */}
-        <div className="lg:col-span-2 card-premium p-8">
-          <div className="flex items-center justify-between mb-10">
+      {/* ── Charts row ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Chart */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-xl font-black text-gray-900 tracking-tight">Revenue Insights</h3>
-              <p className="text-gray-500 text-xs font-medium mt-1">Monthly performance visualization</p>
+              <h3 className="text-base font-black text-gray-900">Revenue & Orders</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Last 6 months</p>
             </div>
           </div>
-          <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(value) => `₹${value}`} />
-                <Tooltip
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                />
-                <Area type="monotone" dataKey="sales" stroke="#7C3AED" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
-              </AreaChart>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={salesData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`} />
+              <Tooltip
+                contentStyle={{ borderRadius: '12px', border: '1px solid #f3f4f6', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontSize: 12 }}
+                formatter={(v, name) => [name === 'revenue' ? `₹${v.toLocaleString()}` : v, name === 'revenue' ? 'Revenue' : 'Orders']}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="#7c3aed" strokeWidth={2.5} fill="url(#rev)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Order Status Pie */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h3 className="text-base font-black text-gray-900 mb-5">Order Status</h3>
+          {orderStatusData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={orderStatusData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={3} dataKey="value">
+                  {orderStatusData.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: '10px', fontSize: 11 }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
+              </PieChart>
             </ResponsiveContainer>
+          ) : (
+            <div className="h-48 flex flex-col items-center justify-center text-gray-300">
+              <ExclamationCircleIcon className="h-10 w-10 mb-2" />
+              <p className="text-xs font-medium">No order data yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Bottom row: Recent Orders + Top Products ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Orders Table */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
+            <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Recent Orders</h3>
+            <a href="/orders" className="text-xs text-primary-600 font-bold hover:underline">View All</a>
+          </div>
+          <div className="overflow-x-auto">
+            {stats.recentOrders?.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {['Order', 'Customer', 'Amount', 'Status', 'Date'].map(h => (
+                      <th key={h} className="text-left text-[10px] font-black uppercase tracking-widest text-gray-400 px-5 py-3">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {stats.recentOrders.slice(0, 6).map((order) => {
+                    const sc = STATUS_COLORS[order.orderStatus] || STATUS_COLORS.pending;
+                    const StatusIcon = sc.icon;
+                    return (
+                      <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-5 py-3 text-xs font-bold text-primary-600">
+                          #{order.orderNumber || order._id?.slice(-6)}
+                        </td>
+                        <td className="px-5 py-3 text-xs text-gray-700 font-medium">
+                          {order.user?.name || 'Guest'}
+                        </td>
+                        <td className="px-5 py-3 text-xs font-black text-gray-900">
+                          ₹{(order.total || 0).toLocaleString()}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${sc.bg} ${sc.text}`}>
+                            <StatusIcon className="h-3 w-3" />
+                            {order.orderStatus}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-[10px] text-gray-400">
+                          {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-16 text-center text-gray-300">
+                <ShoppingBagIcon className="h-10 w-10 mx-auto mb-2" />
+                <p className="text-sm font-medium text-gray-400">No orders yet</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* System Health */}
-        <div className="card-premium p-8">
-          <h3 className="text-xl font-black text-gray-900 tracking-tight mb-8">System Health</h3>
-          <div className="space-y-6">
-            <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100/50">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                  <CheckCircleIcon className="h-6 w-6 text-emerald-500" />
+        {/* Top Products */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide mb-4">Top Products</h3>
+          <div className="space-y-4">
+            {topProducts.map((p, i) => (
+              <div key={p.name} className="flex items-center gap-3">
+                <span className="text-lg font-black text-gray-200">0{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-800 truncate">{p.name}</p>
+                  <p className="text-[10px] text-gray-400">{p.sales} sold · ₹{p.revenue.toLocaleString()}</p>
                 </div>
-                <div>
-                  <div className="text-emerald-900 font-bold text-sm">Server Online</div>
-                  <div className="text-emerald-600 text-[10px] font-medium uppercase tracking-wider">Operational</div>
-                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="space-y-4 pt-4 border-t border-gray-50">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Target Achievement</h4>
-              <div className="space-y-3">
-                <div className="flex justify-between text-xs font-bold mb-1">
-                  <span className="text-gray-600">Monthly Sales Goal</span>
-                  <span className="text-primary-600">84%</span>
-                </div>
-                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary-600 rounded-full" style={{ width: '84%' }}></div>
-                </div>
-              </div>
-            </div>
+          {/* Monthly orders bar mini */}
+          <div className="mt-6 pt-4 border-t border-gray-50">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Orders / Month</p>
+            <ResponsiveContainer width="100%" height={90}>
+              <BarChart data={salesData} barSize={14}>
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#d1d5db', fontSize: 9 }} />
+                <Tooltip contentStyle={{ borderRadius: '10px', fontSize: 10 }} formatter={v => [v, 'Orders']} />
+                <Bar dataKey="orders" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

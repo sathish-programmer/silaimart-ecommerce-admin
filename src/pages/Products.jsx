@@ -21,11 +21,13 @@ const Products = () => {
     discountType: 'percentage', // 'percentage' or 'amount'
     discountValue: '',
     category: '',
+    subCategory: '',
     stock: '',
     sku: '',
     material: '',
     weight: '',
     dimensions: { length: '', width: '', height: '' },
+    specifications: {},
     sculptureDetails: {
       stone: '',
       finish: '',
@@ -36,10 +38,19 @@ const Products = () => {
     },
     images: [],
     sizes: [],
+    variants: [],
     colors: [],
     tags: '',
     isFeatured: false,
-    isActive: true
+    isTrending: false,
+    isBestSeller: false,
+    isNewArrival: false,
+    isActive: true,
+    seo: {
+      title: '',
+      description: '',
+      keywords: ''
+    }
   });
 
   useEffect(() => {
@@ -203,25 +214,28 @@ const Products = () => {
       discountType: 'percentage',
       discountValue: '',
       category: '',
+      subCategory: '',
       stock: '',
       sku: '',
       material: '',
       weight: '',
       dimensions: { length: '', width: '', height: '' },
-      sculptureDetails: {
-        stone: '',
-        finish: '',
-        deity: '',
-        origin: '',
-        artisan: '',
-        technique: ''
-      },
+      specifications: {},
       images: [],
       sizes: [],
+      variants: [],
       colors: [],
       tags: '',
       isFeatured: false,
-      isActive: true
+      isTrending: false,
+      isBestSeller: false,
+      isNewArrival: false,
+      isActive: true,
+      seo: {
+        title: '',
+        description: '',
+        keywords: ''
+      }
     });
     setEditProduct(null);
   };
@@ -232,11 +246,13 @@ const Products = () => {
       setFormData({
         ...product,
         category: product.category?._id || product.category || '',
+        subCategory: product.subCategory?._id || product.subCategory || '',
         discountPrice: product.discountPrice || '',
         discountValue: product.discountValue || '',
         discountType: product.discountType || 'percentage',
         tags: product.tags?.join(', ') || '',
         dimensions: product.dimensions || { length: '', width: '', height: '' },
+        specifications: product.specifications || {},
         sculptureDetails: product.sculptureDetails || {
           stone: '',
           finish: '',
@@ -244,7 +260,11 @@ const Products = () => {
           origin: '',
           artisan: '',
           technique: ''
-        }
+        },
+        isTrending: product.isTrending || false,
+        isBestSeller: product.isBestSeller || false,
+        isNewArrival: product.isNewArrival || false,
+        seo: product.seo || { title: '', description: '', keywords: '' }
       });
     } else {
       resetForm();
@@ -375,13 +395,23 @@ const Products = () => {
                     required
                   >
                     <option value="">Select Category</option>
-                    {categories.length > 0 ? (
-                      categories.map(cat => (
-                        <option key={cat._id} value={cat._id}>{cat.name}</option>
-                      ))
-                    ) : (
-                      <option disabled>Loading categories...</option>
-                    )}
+                    {categories.map(cat => (
+                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Sub-Category</label>
+                  <select
+                    value={formData.subCategory}
+                    onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                  >
+                    <option value="">Select Sub-Category</option>
+                    {categories.find(c => c._id === formData.category)?.subCategories?.map(sub => (
+                      <option key={sub._id} value={sub._id}>{sub.name}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -443,91 +473,64 @@ const Products = () => {
                   />
                 </div>
 
-                {/* Sculpture Details */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Stone Type</label>
-                  <select
-                    value={formData.sculptureDetails.stone}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, stone: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  >
-                    <option value="">Select Stone</option>
-                    {masterValues.stone_types?.map(stone => (
-                      <option key={stone._id} value={stone.value}>{stone.label}</option>
+                {/* New Dynamic Specifications */}
+                <div className="col-span-full space-y-4">
+                  <label className="block text-gray-700 font-bold uppercase text-[10px] tracking-[0.2em] pl-1">Product Specifications</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(formData.specifications).map(([key, value], idx) => (
+                      <div key={idx} className="flex space-x-2">
+                        <input
+                          type="text"
+                          value={key}
+                          onChange={(e) => {
+                            const newSpecs = { ...formData.specifications };
+                            const val = newSpecs[key];
+                            delete newSpecs[key];
+                            newSpecs[e.target.value] = val;
+                            setFormData({ ...formData, specifications: newSpecs });
+                          }}
+                          className="w-1/3 px-4 py-2 bg-stone-50 border border-gray-100 rounded-xl text-xs font-bold"
+                          placeholder="Attribute Name"
+                        />
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              specifications: { ...formData.specifications, [key]: e.target.value }
+                            });
+                          }}
+                          className="flex-1 px-4 py-2 bg-stone-50 border border-gray-100 rounded-xl text-xs"
+                          placeholder="Value"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSpecs = { ...formData.specifications };
+                            delete newSpecs[key];
+                            setFormData({ ...formData, specifications: newSpecs });
+                          }}
+                          className="p-2 text-rose-400"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     ))}
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, specifications: { ...formData.specifications, '': '' } })}
+                      className="text-primary-600 text-xs font-bold py-2 border-2 border-dashed border-primary-100 rounded-xl"
+                    >
+                      + Add Specification
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Finish</label>
-                  <select
-                    value={formData.sculptureDetails.finish}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, finish: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  >
-                    <option value="">Select Finish</option>
-                    {masterValues.finishes?.map(finish => (
-                      <option key={finish._id} value={finish.value}>{finish.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Deity/Subject</label>
-                  <input
-                    type="text"
-                    value={formData.sculptureDetails.deity}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, deity: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Origin</label>
-                  <input
-                    type="text"
-                    value={formData.sculptureDetails.origin}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, origin: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Artisan</label>
-                  <input
-                    type="text"
-                    value={formData.sculptureDetails.artisan}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, artisan: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Technique</label>
-                  <input
-                    type="text"
-                    value={formData.sculptureDetails.technique}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      sculptureDetails: { ...formData.sculptureDetails, technique: e.target.value }
-                    })}
-                    className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  />
+                {/* Generic Product Attributes */}
+                <div className="col-span-full bg-blue-50 border border-blue-100 rounded-xl p-4">
+                  <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest mb-1">💡 Tip</p>
+                  <p className="text-xs text-blue-600">Use <strong>Product Specifications</strong> above to add any custom attributes (e.g. Material, Stone, Finish, Color, Size, Brand, etc.) — works for all product types.</p>
                 </div>
 
                 <div>
@@ -550,7 +553,6 @@ const Products = () => {
                     className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
                   />
                 </div>
-              </div>
 
               {/* Dimensions Section */}
               <div className="space-y-4">
@@ -754,7 +756,7 @@ const Products = () => {
                   value={formData.tags}
                   onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                   className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
-                  placeholder="sculpture, handmade, religious"
+                  placeholder="handmade, artisan, home-decor, gift"
                 />
               </div>
 
@@ -772,15 +774,72 @@ const Products = () => {
                 <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
                   <input
                     type="checkbox"
+                    checked={formData.isTrending}
+                    onChange={(e) => setFormData({ ...formData, isTrending: e.target.checked })}
+                    className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
+                  />
+                  Trending
+                </label>
+
+                <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.isBestSeller}
+                    onChange={(e) => setFormData({ ...formData, isBestSeller: e.target.checked })}
+                    className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
+                  />
+                  Best Seller
+                </label>
+
+                <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.isNewArrival}
+                    onChange={(e) => setFormData({ ...formData, isNewArrival: e.target.checked })}
+                    className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
+                  />
+                  New Arrival
+                </label>
+
+                <label className="flex items-center text-gray-700 font-bold text-xs uppercase tracking-widest cursor-pointer group">
+                  <input
+                    type="checkbox"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     className="w-5 h-5 rounded border-gray-100 text-primary-600 focus:ring-primary-500 mr-3 transition-all"
                   />
-                  Core Activation
+                  Active
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-6 pt-10 border-t border-gray-50">
+              {/* SEO Section */}
+              <div className="space-y-6 border-t border-gray-50 pt-8">
+                <label className="block text-gray-700 font-bold uppercase text-[10px] tracking-[0.2em] pl-1">Enterprise SEO (Optional)</label>
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Meta Title</label>
+                    <input
+                      type="text"
+                      value={formData.seo.title}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, title: e.target.value } })}
+                      className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none"
+                      placeholder="Enter optimized title"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Meta Description</label>
+                    <textarea
+                      value={formData.seo.description}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, description: e.target.value } })}
+                      className="w-full px-4 py-3 bg-stone-50 border border-gray-100 rounded-xl text-gray-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all outline-none h-24"
+                      placeholder="Enter optimized description"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-6 pt-10 border-t border-gray-50">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}

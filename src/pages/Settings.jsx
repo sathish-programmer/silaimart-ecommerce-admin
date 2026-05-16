@@ -40,6 +40,14 @@ const Settings = () => {
       pointsPerRupee: 0.1,
       minimumRedeemPoints: 100,
       redemptionRate: 1
+    },
+    offers: {
+      wowDeal: { enabled: true, title: 'WOW! DEAL Apply offers for maximum savings', discountPercentage: 15, minOrderValue: 500 },
+      superCoin: { enabled: true, benefitTitle: 'SuperCoin Benefit', pointsDiscount: 12, coinsRequired: 12 },
+      bankOffers: [
+        { id: 'bank-1', title: 'Bank Offer', description: '5% Cashback on Flipkart Axis Bank Card', code: 'AXIS5', discountPercent: 5 },
+        { id: 'bank-2', title: 'Special Offer', description: '10% off on ICICI Bank Credit Cards, up to ₹100', code: 'ICICI10', discountPercent: 10 }
+      ]
     }
   });
   const [loading, setLoading] = useState(true);
@@ -101,6 +109,20 @@ const Settings = () => {
         }
       }
     }));
+  };
+
+  const handleBankOfferChange = (index, field, value) => {
+    setSettings(prev => {
+      const updatedBankOffers = [...(prev.offers?.bankOffers || [])];
+      updatedBankOffers[index] = { ...updatedBankOffers[index], [field]: value };
+      return {
+        ...prev,
+        offers: {
+          ...prev.offers,
+          bankOffers: updatedBankOffers
+        }
+      };
+    });
   };
 
   if (loading) return <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
@@ -517,6 +539,167 @@ const Settings = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Dynamic Offers & Deals Settings */}
+        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
+            <TrophyIcon className="h-24 w-24 text-blue-500" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-8 relative z-10">Flipkart-Style Offers & Deals Bridge</h2>
+
+          <div className="space-y-8">
+            {/* Wow Deal */}
+            <div className="bg-blue-50/40 rounded-3xl p-8 border border-blue-100">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-blue-900 font-black text-base tracking-tight mb-1">WOW! Deal Banner</p>
+                  <p className="text-blue-600 text-xs font-medium">Prominent blue offer box on product detail pages</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.offers?.wowDeal?.enabled ?? true}
+                    onChange={(e) => handleNestedFieldChange('offers', 'wowDeal', 'enabled', e.target.checked)}
+                    className="sr-only peer"
+                    disabled={!isSuperAdmin}
+                  />
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+                </label>
+              </div>
+
+              {settings.offers?.wowDeal?.enabled && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-blue-100/50">
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Banner Title</label>
+                    <input
+                      type="text"
+                      value={settings.offers?.wowDeal?.title || ''}
+                      onChange={(e) => handleNestedFieldChange('offers', 'wowDeal', 'title', e.target.value)}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Discount %</label>
+                    <input
+                      type="number"
+                      value={settings.offers?.wowDeal?.discountPercentage || 15}
+                      onChange={(e) => handleNestedFieldChange('offers', 'wowDeal', 'discountPercentage', parseInt(e.target.value))}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Min Order Value (₹)</label>
+                    <input
+                      type="number"
+                      value={settings.offers?.wowDeal?.minOrderValue || 500}
+                      onChange={(e) => handleNestedFieldChange('offers', 'wowDeal', 'minOrderValue', parseInt(e.target.value))}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SuperCoin Benefit */}
+            <div className="bg-amber-50/40 rounded-3xl p-8 border border-amber-100">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-amber-900 font-black text-base tracking-tight mb-1">SuperCoin Benefit</p>
+                  <p className="text-amber-600 text-xs font-medium">Allow extra savings using loyalty points/coins</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.offers?.superCoin?.enabled ?? true}
+                    onChange={(e) => handleNestedFieldChange('offers', 'superCoin', 'enabled', e.target.checked)}
+                    className="sr-only peer"
+                    disabled={!isSuperAdmin}
+                  />
+                  <div className="w-14 h-8 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-500 shadow-inner"></div>
+                </label>
+              </div>
+
+              {settings.offers?.superCoin?.enabled && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-amber-100/50">
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Benefit Title</label>
+                    <input
+                      type="text"
+                      value={settings.offers?.superCoin?.benefitTitle || ''}
+                      onChange={(e) => handleNestedFieldChange('offers', 'superCoin', 'benefitTitle', e.target.value)}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Points Discount (₹)</label>
+                    <input
+                      type="number"
+                      value={settings.offers?.superCoin?.pointsDiscount || 12}
+                      onChange={(e) => handleNestedFieldChange('offers', 'superCoin', 'pointsDiscount', parseInt(e.target.value))}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Coins Required</label>
+                    <input
+                      type="number"
+                      value={settings.offers?.superCoin?.coinsRequired || 12}
+                      onChange={(e) => handleNestedFieldChange('offers', 'superCoin', 'coinsRequired', parseInt(e.target.value))}
+                      className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                      disabled={!isSuperAdmin}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bank Offers */}
+            <div className="bg-stone-50/50 rounded-3xl p-8 border border-gray-100">
+              <p className="text-gray-900 font-black text-base tracking-tight mb-6">Bank & Card Offers</p>
+              <div className="space-y-6">
+                {(settings.offers?.bankOffers || []).map((bankOffer, index) => (
+                  <div key={bankOffer.id || index} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                    <div>
+                      <label className="block text-gray-500 text-xs font-bold mb-2">Offer Title</label>
+                      <input
+                        type="text"
+                        value={bankOffer.title}
+                        onChange={(e) => handleBankOfferChange(index, 'title', e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-900 font-bold outline-none"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-gray-500 text-xs font-bold mb-2">Description</label>
+                      <input
+                        type="text"
+                        value={bankOffer.description}
+                        onChange={(e) => handleBankOfferChange(index, 'description', e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-900 font-medium outline-none"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-500 text-xs font-bold mb-2">Discount %</label>
+                      <input
+                        type="number"
+                        value={bankOffer.discountPercent}
+                        onChange={(e) => handleBankOfferChange(index, 'discountPercent', parseInt(e.target.value))}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-900 font-bold outline-none"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

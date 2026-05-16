@@ -27,8 +27,8 @@ const CustomOrderManager = () => {
       const data = await response.json();
       setRequests(data.requests || []);
     } catch (error) {
-      console.error('Error fetching custom order requests:', error);
-      toast.error('Failed to fetch custom order requests');
+      console.error('Error fetching custom requests:', error);
+      toast.error('Failed to fetch custom requests');
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ const CustomOrderManager = () => {
         toast.error(data.message || 'Failed to update request');
       }
     } catch (error) {
-      console.error('Error updating custom order request:', error);
+      console.error('Error updating custom request:', error);
       toast.error('An error occurred while updating the request.');
     }
   };
@@ -102,9 +102,9 @@ const CustomOrderManager = () => {
           <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
             <ChatBubbleLeftRightIcon className="h-8 w-8 text-primary-600" />
           </div>
-          <span>Custom Commissions</span>
+          <span>Custom Requests</span>
         </h1>
-        <p className="text-gray-500 font-medium mt-1 pl-16">Monitor and manage bespoke sculpture requests from global patrons</p>
+        <p className="text-gray-500 font-medium mt-1 pl-16">Monitor and manage bespoke product requests from global customers</p>
       </div>
 
       {/* Requests Grid */}
@@ -114,8 +114,8 @@ const CustomOrderManager = () => {
             <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-6">
               <ClockIcon className="h-10 w-10 text-gray-300" />
             </div>
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Registry Inactive</h3>
-            <p className="text-gray-500 font-medium">Commission requests will manifest here upon submission by patrons.</p>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">No Requests</h3>
+            <p className="text-gray-500 font-medium">Custom requests will appear here once submitted by customers.</p>
           </div>
         ) : (
           requests.map((request) => (
@@ -123,11 +123,11 @@ const CustomOrderManager = () => {
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-2 py-0.5 rounded uppercase tracking-[0.2em]">New Commission</span>
+                    <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-2 py-0.5 rounded uppercase tracking-[0.2em]">New Request</span>
                     <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">{new Date(request.createdAt).toLocaleDateString()}</span>
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 tracking-tight leading-tight">
-                    {request.user?.name || 'Patron Anonymous'}
+                    {request.user?.name || 'Customer Anonymous'}
                   </h3>
                 </div>
                 <div className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm ${request.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
@@ -156,7 +156,7 @@ const CustomOrderManager = () => {
                   )}
                   {request.estimatedDeliveryDate && (
                     <div className="flex flex-col border-l border-gray-100 pl-4">
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected Release</span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estimated Date</span>
                       <span className="text-gray-900 font-black text-sm tracking-tight">{new Date(request.estimatedDeliveryDate).toLocaleDateString()}</span>
                     </div>
                   )}
@@ -167,7 +167,7 @@ const CustomOrderManager = () => {
                   className="bg-primary-600 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.1em] hover:bg-primary-700 transition-all shadow-lg shadow-primary-100 active:scale-95 flex items-center gap-3"
                 >
                   <EyeIcon className="h-4 w-4 stroke-[3px]" />
-                  Execute Review
+                  Review Request
                 </button>
               </div>
             </div>
@@ -181,7 +181,7 @@ const CustomOrderManager = () => {
           <div className="bg-white rounded-[3rem] w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-100 shadow-2xl flex flex-col scale-in-center">
             <div className="flex justify-between items-center px-10 py-8 border-b border-gray-50 bg-stone-50/50">
               <div>
-                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Commission Dossier</h2>
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Request Details</h2>
                 <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Reviewing intent from {selectedRequest.user?.name}</p>
               </div>
               <button
@@ -194,22 +194,22 @@ const CustomOrderManager = () => {
 
             <div className="overflow-y-auto p-10 custom-scrollbar">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Left Column: Artifact Specifications */}
+                {/* Left Column: Specifications */}
                 <div className="space-y-10">
                   <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-amber-400 rounded-full"></div>
-                    Patron Requirements
+                    Customer Requirements
                   </h3>
 
                   <div className="bg-stone-50/50 p-8 rounded-[2.5rem] border border-gray-50 space-y-8">
                     <div className="grid grid-cols-2 gap-8">
                       {[
-                        { label: 'Artifact Type', value: selectedRequest.sculptureType },
-                        { label: 'Medium', value: selectedRequest.material },
-                        { label: 'Scale Class', value: selectedRequest.size },
-                        { label: 'Color Theory', value: selectedRequest.color },
-                        { label: 'Economic Budget', value: selectedRequest.budget },
-                        { label: 'Temporal Limit', value: selectedRequest.timeline },
+                        { label: 'Product Type', value: selectedRequest.productType || selectedRequest.sculptureType },
+                        { label: 'Material', value: selectedRequest.material },
+                        { label: 'Scale/Size', value: selectedRequest.size },
+                        { label: 'Color Preference', value: selectedRequest.color },
+                        { label: 'Budget Range', value: selectedRequest.budget },
+                        { label: 'Timeline', value: selectedRequest.timeline },
                       ].map((spec, i) => spec.value && (
                         <div key={i} className="flex flex-col">
                           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{spec.label}</span>
@@ -218,19 +218,19 @@ const CustomOrderManager = () => {
                       ))}
                     </div>
 
-                    {(selectedRequest.height || selectedRequest.width || selectedRequest.depth) && (
+                    {(selectedRequest.height || selectedRequest.width || selectedRequest.depth || selectedRequest.dimensions) && (
                       <div className="pt-4 border-t border-gray-100">
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Precise Dimensions</span>
                         <p className="text-gray-900 font-black text-lg tracking-tight">
-                          {selectedRequest.height && `${selectedRequest.height}″ H`}
-                          {selectedRequest.width && ` × ${selectedRequest.width}″ W`}
-                          {selectedRequest.depth && ` × ${selectedRequest.depth}″ D`}
+                          {selectedRequest.dimensions?.height || selectedRequest.height || '0'} H
+                          {` × ${selectedRequest.dimensions?.width || selectedRequest.width || '0'}`} W
+                          {` × ${selectedRequest.dimensions?.depth || selectedRequest.depth || '0'}`} D
                         </p>
                       </div>
                     )}
 
                     <div className="pt-4 border-t border-gray-100">
-                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Manifesto / Description</span>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Description</span>
                       <p className="text-gray-600 font-medium text-sm leading-relaxed whitespace-pre-line bg-white p-6 rounded-2xl border border-gray-50 shadow-inner">
                         {selectedRequest.description || selectedRequest.requestDetails}
                       </p>
@@ -239,7 +239,7 @@ const CustomOrderManager = () => {
 
                   {selectedRequest.images && selectedRequest.images.length > 0 && (
                     <div className="space-y-6">
-                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Visonal References</h4>
+                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-2">Reference Images</h4>
                       <div className="grid grid-cols-4 gap-4">
                         {selectedRequest.images.map((img, index) => (
                           <img key={index} src={img.url} alt="Reference" className="w-full aspect-square object-cover rounded-2xl border border-gray-100 shadow-sm hover:scale-105 transition-transform" />
@@ -253,13 +253,13 @@ const CustomOrderManager = () => {
                 <div className="space-y-10">
                   <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-primary-600 rounded-full"></div>
-                    Strategic Update
+                    Update Request
                   </h3>
 
                   <div className="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-inner space-y-8">
                     <div className="space-y-6">
                       <div>
-                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Operational Status</label>
+                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Status</label>
                         <select
                           value={formData.status}
                           onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -273,7 +273,7 @@ const CustomOrderManager = () => {
 
                       <div className="grid grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Financial Quote (₹)</label>
+                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Quote (₹)</label>
                           <input
                             type="number"
                             value={formData.quotedPrice}
@@ -283,7 +283,7 @@ const CustomOrderManager = () => {
                           />
                         </div>
                         <div>
-                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Estimated Dispatch</label>
+                          <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Est. Delivery</label>
                           <input
                             type="date"
                             value={formData.estimatedDeliveryDate}
@@ -294,13 +294,13 @@ const CustomOrderManager = () => {
                       </div>
 
                       <div>
-                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Director's Notes (Internal / Narrative)</label>
+                        <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Internal Notes</label>
                         <textarea
                           value={formData.adminNotes}
                           onChange={(e) => setFormData({ ...formData, adminNotes: e.target.value })}
                           rows="5"
                           className="w-full px-6 py-6 bg-stone-50 border border-gray-100 rounded-[2rem] text-gray-700 font-medium h-40 resize-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all leading-relaxed"
-                          placeholder="Document internal deliberations or communication details..."
+                          placeholder="Document internal deliberations..."
                         />
                       </div>
 
@@ -313,7 +313,7 @@ const CustomOrderManager = () => {
                             className="sr-only peer"
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                          <span className="ml-4 text-[10px] font-black uppercase tracking-widest text-primary-900">Notify Patron via Email</span>
+                          <span className="ml-4 text-[10px] font-black uppercase tracking-widest text-primary-900">Notify via Email</span>
                         </label>
                       </div>
                     </div>
@@ -324,13 +324,13 @@ const CustomOrderManager = () => {
                       onClick={() => setShowModal(false)}
                       className="flex-1 py-5 bg-stone-100 text-gray-600 font-black rounded-3xl hover:bg-stone-200 transition-all active:scale-95 text-xs uppercase tracking-widest"
                     >
-                      Discard
+                      Cancel
                     </button>
                     <button
                       onClick={handleUpdate}
                       className="flex-1 py-5 bg-primary-600 text-white font-black rounded-3xl hover:bg-primary-700 shadow-xl shadow-primary-100 transition-all active:scale-95 text-xs uppercase tracking-widest"
                     >
-                      Execute Protocol
+                      Update
                     </button>
                   </div>
                 </div>

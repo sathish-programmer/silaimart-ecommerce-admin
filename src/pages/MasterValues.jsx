@@ -20,7 +20,7 @@ const MasterValues = () => {
     { key: 'stone_types', label: 'Stone Types' },
     { key: 'finishes', label: 'Finishes' },
     { key: 'materials', label: 'Materials' },
-    { key: 'sculpture_types', label: 'Sculpture Types' },
+    { key: 'product_types', label: 'Product Types' },
     { key: 'sizes', label: 'Sizes' },
     { key: 'colors', label: 'Colors' }
   ];

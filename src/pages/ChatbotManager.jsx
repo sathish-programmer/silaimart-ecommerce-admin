@@ -18,7 +18,7 @@ const ChatbotManager = () => {
   const [activeTab, setActiveTab] = useState('config');
   const [botConfig, setBotConfig] = useState({
     name: 'SilaiMart Assistant',
-    welcomeMessage: 'Hello! I\'m here to help you find the perfect sculpture. How can I assist you today?',
+    welcomeMessage: 'Hello! I\'m here to help you find the perfect product. How can I assist you today?',
     isActive: true,
     responses: [],
     quickActions: []

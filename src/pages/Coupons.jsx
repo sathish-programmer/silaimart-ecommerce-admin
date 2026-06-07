@@ -182,7 +182,7 @@ const Coupons = () => {
                   </span>
                 </td>
                 <td className="px-8 py-5 text-gray-400 font-medium">
-                  {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'Lifetime'}
+                  {coupon.validUntil ? new Date(coupon.validUntil).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'Lifetime'}
                 </td>
                 <td className="px-8 py-5 text-right pr-10">
                   <div className="flex justify-end space-x-1">

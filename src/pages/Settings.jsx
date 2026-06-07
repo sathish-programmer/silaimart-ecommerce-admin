@@ -8,7 +8,9 @@ import {
   TruckIcon,
   ScaleIcon,
   TrophyIcon,
-  CheckIcon
+  CheckIcon,
+  PlusIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { apiCall } from '../utils/api';
@@ -21,6 +23,12 @@ const Settings = () => {
       stripe: { enabled: false, publicKey: '', secretKey: '' },
       cod: { enabled: true, minimumAmount: 0, maximumAmount: 5000 },
       qr: { enabled: false, upiId: 'silaimart@paytm', merchantName: 'SilaiMart' }
+    },
+    site: {
+      store: {
+        sizeGuideImage: '',
+        customPincodes: []
+      }
     },
     shipping: {
       freeShippingThreshold: 1000,
@@ -125,6 +133,77 @@ const Settings = () => {
     });
   };
 
+  const handleAddBankOffer = () => {
+    setSettings(prev => ({
+      ...prev,
+      offers: {
+        ...prev.offers,
+        bankOffers: [...(prev.offers?.bankOffers || []), { id: `bank-${Date.now()}`, title: '', description: '', code: '', discountPercent: 0 }]
+      }
+    }));
+  };
+
+  const handleRemoveBankOffer = (index) => {
+    setSettings(prev => {
+      const updated = [...(prev.offers?.bankOffers || [])];
+      updated.splice(index, 1);
+      return {
+        ...prev,
+        offers: {
+          ...prev.offers,
+          bankOffers: updated
+        }
+      };
+    });
+  };
+
+  const handleAddCustomPincode = () => {
+    setSettings(prev => ({
+      ...prev,
+      site: {
+        ...prev.site,
+        store: {
+          ...prev.site?.store,
+          customPincodes: [...(prev.site?.store?.customPincodes || []), { pincode: '', deliveryDays: 5, codAvailable: true, freeDelivery: false }]
+        }
+      }
+    }));
+  };
+
+  const handleCustomPincodeChange = (index, field, value) => {
+    setSettings(prev => {
+      const updated = [...(prev.site?.store?.customPincodes || [])];
+      updated[index] = { ...updated[index], [field]: value };
+      return {
+        ...prev,
+        site: {
+          ...prev.site,
+          store: {
+            ...prev.site?.store,
+            customPincodes: updated
+          }
+        }
+      };
+    });
+  };
+
+  const handleRemoveCustomPincode = (index) => {
+    setSettings(prev => {
+      const updated = [...(prev.site?.store?.customPincodes || [])];
+      updated.splice(index, 1);
+      return {
+        ...prev,
+        site: {
+          ...prev.site,
+          store: {
+            ...prev.site?.store,
+            customPincodes: updated
+          }
+        }
+      };
+    });
+  };
+
   if (loading) return <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
 
   return (
@@ -146,6 +225,41 @@ const Settings = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-8">
+        {/* Store Settings */}
+        <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
+            <ScaleIcon className="h-24 w-24 text-primary-600" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-8 relative z-10">Store Configuration</h2>
+
+          <div className="space-y-6">
+            <div className="bg-stone-50/50 rounded-3xl p-8 border border-gray-100 transition-all hover:bg-white hover:shadow-md">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+                    <ScaleIcon className="h-8 w-8 text-primary-500" />
+                  </div>
+                  <div>
+                    <span className="font-black text-gray-900 block tracking-tight">Size Guide Image</span>
+                    <span className="text-gray-500 text-xs font-medium">Global size chart shown on product pages</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-[10px] tracking-[0.2em] pl-1">Image URL</label>
+                <input
+                  type="text"
+                  value={settings.site?.store?.sizeGuideImage || ''}
+                  onChange={(e) => handleNestedFieldChange('site', 'store', { ...settings.site?.store, sizeGuideImage: e.target.value })}
+                  className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all placeholder:text-gray-300"
+                  placeholder="https://example.com/size-guide.jpg"
+                  disabled={!isSuperAdmin}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Payment Settings */}
         <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -432,6 +546,82 @@ const Settings = () => {
                 />
               </div>
             </div>
+
+            {/* Custom Pincode Rules */}
+            <div className="mt-12 pt-8 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-gray-900 font-black text-sm uppercase tracking-widest mb-1">Custom Pincode Rules</h3>
+                  <p className="text-gray-500 text-xs font-medium">Override default delivery times for specific areas</p>
+                </div>
+                {isSuperAdmin && (
+                  <button
+                    onClick={handleAddCustomPincode}
+                    className="px-4 py-2 bg-primary-50 text-primary-600 font-bold rounded-xl hover:bg-primary-100 transition-all text-xs"
+                  >
+                    + Add Rule
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {(settings.site?.store?.customPincodes || []).map((rule, idx) => (
+                  <div key={idx} className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-wrap items-center gap-4">
+                    <div className="flex-1 min-w-[150px]">
+                      <label className="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pincode</label>
+                      <input
+                        type="text"
+                        value={rule.pincode}
+                        onChange={(e) => handleCustomPincodeChange(idx, 'pincode', e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold outline-none"
+                        placeholder="e.g. 600001"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-[120px]">
+                      <label className="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Days</label>
+                      <input
+                        type="number"
+                        value={rule.deliveryDays}
+                        onChange={(e) => handleCustomPincodeChange(idx, 'deliveryDays', parseInt(e.target.value))}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold outline-none"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                    <div className="flex items-center gap-4 mt-4 lg:mt-0">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={rule.codAvailable}
+                          onChange={(e) => handleCustomPincodeChange(idx, 'codAvailable', e.target.checked)}
+                          className="w-4 h-4 text-primary-600"
+                          disabled={!isSuperAdmin}
+                        />
+                        COD
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={rule.freeDelivery}
+                          onChange={(e) => handleCustomPincodeChange(idx, 'freeDelivery', e.target.checked)}
+                          className="w-4 h-4 text-primary-600"
+                          disabled={!isSuperAdmin}
+                        />
+                        Free Del.
+                      </label>
+                      {isSuperAdmin && (
+                        <button onClick={() => handleRemoveCustomPincode(idx)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg ml-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {(!settings.site?.store?.customPincodes || settings.site.store.customPincodes.length === 0) && (
+                  <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">No custom pincode rules defined.</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -662,11 +852,21 @@ const Settings = () => {
 
             {/* Bank Offers */}
             <div className="bg-stone-50/50 rounded-3xl p-8 border border-gray-100">
-              <p className="text-gray-900 font-black text-base tracking-tight mb-6">Bank & Card Offers</p>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-gray-900 font-black text-base tracking-tight">Bank & Card Offers</p>
+                {isSuperAdmin && (
+                  <button
+                    onClick={handleAddBankOffer}
+                    className="px-4 py-2 bg-primary-50 text-primary-600 font-bold rounded-xl hover:bg-primary-100 transition-all text-xs flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-4 h-4" /> Add Offer
+                  </button>
+                )}
+              </div>
               <div className="space-y-6">
                 {(settings.offers?.bankOffers || []).map((bankOffer, index) => (
-                  <div key={bankOffer.id || index} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-                    <div>
+                  <div key={bankOffer.id || index} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <div className="md:col-span-3">
                       <label className="block text-gray-500 text-xs font-bold mb-2">Offer Title</label>
                       <input
                         type="text"
@@ -676,7 +876,7 @@ const Settings = () => {
                         disabled={!isSuperAdmin}
                       />
                     </div>
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-4">
                       <label className="block text-gray-500 text-xs font-bold mb-2">Description</label>
                       <input
                         type="text"
@@ -686,7 +886,17 @@ const Settings = () => {
                         disabled={!isSuperAdmin}
                       />
                     </div>
-                    <div>
+                    <div className="md:col-span-2">
+                      <label className="block text-gray-500 text-xs font-bold mb-2">Code</label>
+                      <input
+                        type="text"
+                        value={bankOffer.code}
+                        onChange={(e) => handleBankOfferChange(index, 'code', e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-900 font-bold outline-none uppercase"
+                        disabled={!isSuperAdmin}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
                       <label className="block text-gray-500 text-xs font-bold mb-2">Discount %</label>
                       <input
                         type="number"
@@ -696,8 +906,18 @@ const Settings = () => {
                         disabled={!isSuperAdmin}
                       />
                     </div>
+                    <div className="md:col-span-1 flex justify-end">
+                      {isSuperAdmin && (
+                        <button onClick={() => handleRemoveBankOffer(index)} className="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all h-full mt-6">
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
+                {(!settings.offers?.bankOffers || settings.offers.bankOffers.length === 0) && (
+                  <p className="text-sm text-gray-500 text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">No bank offers added yet.</p>
+                )}
               </div>
             </div>
           </div>

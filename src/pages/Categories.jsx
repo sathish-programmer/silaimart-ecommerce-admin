@@ -10,7 +10,7 @@ const Categories = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '', image: { url: '', alt: '' } });
+  const [formData, setFormData] = useState({ name: '', description: '', image: { url: '', alt: '' }, sizeGuideImage: { url: '', alt: '' }, parent: '' });
 
   useEffect(() => {
     fetchCategories();
@@ -37,6 +37,30 @@ const Categories = () => {
     setFormData(prev => ({
       ...prev,
       image: { url: '', alt: '' }
+    }));
+  };
+
+  const handleSizeGuideImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          sizeGuideImage: {
+            url: e.target.result,
+            alt: file.name
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeSizeGuideImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      sizeGuideImage: { url: '', alt: '' }
     }));
   };
 
@@ -72,7 +96,7 @@ const Categories = () => {
 
       setShowModal(false);
       setEditCategory(null);
-      setFormData({ name: '', description: '', image: { url: '', alt: '' } });
+      setFormData({ name: '', description: '', image: { url: '', alt: '' }, sizeGuideImage: { url: '', alt: '' }, parent: '' });
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
@@ -101,11 +125,15 @@ const Categories = () => {
     setFormData(category ? {
       name: category.name,
       description: category.description || '',
-      image: category.image || { url: '', alt: '' }
+      image: category.image || { url: '', alt: '' },
+      sizeGuideImage: category.sizeGuideImage || { url: '', alt: '' },
+      parent: category.parent || ''
     } : {
       name: '',
       description: '',
-      image: { url: '', alt: '' }
+      image: { url: '', alt: '' },
+      sizeGuideImage: { url: '', alt: '' },
+      parent: ''
     });
     setShowModal(true);
   };
@@ -155,7 +183,12 @@ const Categories = () => {
                 </button>
               </div>
             </div>
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2 group-hover:text-primary-600 transition-colors">{category.name}</h3>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2 group-hover:text-primary-600 transition-colors">
+              {category.name}
+              {category.parent && (
+                <span className="ml-2 text-[10px] bg-stone-100 text-stone-500 px-2 py-1 rounded-full uppercase tracking-wider">Sub</span>
+              )}
+            </h3>
             <p className="text-gray-500 font-medium line-clamp-2 min-h-[3rem] mb-6">{category.description || 'No description provided for this collection.'}</p>
             <div className="border-t border-gray-50 pt-4 mt-2">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Unique Slug</span>
@@ -208,6 +241,19 @@ const Categories = () => {
                 />
               </div>
               <div>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Parent Category</label>
+                <select
+                  value={formData.parent}
+                  onChange={(e) => setFormData({ ...formData, parent: e.target.value })}
+                  className="w-full bg-stone-50 border border-gray-100 rounded-2xl px-5 py-4 text-gray-900 font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+                >
+                  <option value="">None (Top-Level Category)</option>
+                  {categories.filter(c => !c.parent && c._id !== editCategory?._id).map(c => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Collection Image</label>
                 <div className="space-y-4">
                   <div className="border-2 border-dashed border-stone-200 rounded-3xl p-8 bg-stone-50 group hover:border-primary-300 hover:bg-primary-50/10 transition-all duration-300">
@@ -232,6 +278,40 @@ const Categories = () => {
                       <button
                         type="button"
                         onClick={removeImage}
+                        className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors shadow-lg"
+                      >
+                        <XMarkIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-bold mb-3 uppercase text-xs tracking-widest pl-1">Size Guide Image (Optional)</label>
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-stone-200 rounded-3xl p-8 bg-stone-50 group hover:border-primary-300 hover:bg-primary-50/10 transition-all duration-300">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSizeGuideImageUpload}
+                      className="hidden"
+                      id="size-guide-image"
+                    />
+                    <label
+                      htmlFor="size-guide-image"
+                      className="flex flex-col items-center justify-center cursor-pointer p-2 group"
+                    >
+                      <PhotoIcon className="h-10 w-10 text-gray-300 mb-2 group-hover:text-primary-500 transition-colors" />
+                      <span className="text-gray-500 font-black text-[10px] uppercase tracking-widest">Upload Size Guide</span>
+                    </label>
+                  </div>
+                  {formData.sizeGuideImage?.url && (
+                    <div className="relative rounded-2xl overflow-hidden border border-gray-100 aspect-video">
+                      <img src={formData.sizeGuideImage.url} alt="Size Guide Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={removeSizeGuideImage}
                         className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors shadow-lg"
                       >
                         <XMarkIcon className="h-4 w-4" />

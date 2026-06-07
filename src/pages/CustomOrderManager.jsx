@@ -204,7 +204,7 @@ const CustomOrderManager = () => {
                   <div className="bg-stone-50/50 p-8 rounded-[2.5rem] border border-gray-50 space-y-8">
                     <div className="grid grid-cols-2 gap-8">
                       {[
-                        { label: 'Product Type', value: selectedRequest.productType || selectedRequest.sculptureType },
+                        { label: 'Product Type', value: selectedRequest.productType || selectedRequest.productType },
                         { label: 'Material', value: selectedRequest.material },
                         { label: 'Scale/Size', value: selectedRequest.size },
                         { label: 'Color Preference', value: selectedRequest.color },

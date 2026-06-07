@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
+import ProductForm from './pages/ProductForm';
+import ProductView from './pages/ProductView';
 import Categories from './pages/Categories';
 import Orders from './pages/Orders';
 import Reviews from './pages/Reviews';
@@ -87,6 +89,9 @@ function AppContent() {
             {/* Admin and Superadmin Routes */}
             <Route path="/" element={<AdminRoute><Dashboard /></AdminRoute>} />
             <Route path="/products" element={<AdminRoute><Products /></AdminRoute>} />
+            <Route path="/products/new" element={<AdminRoute><ProductForm /></AdminRoute>} />
+            <Route path="/products/edit/:id" element={<AdminRoute><ProductForm /></AdminRoute>} />
+            <Route path="/products/:id" element={<AdminRoute><ProductView /></AdminRoute>} />
             <Route path="/categories" element={<AdminRoute><Categories /></AdminRoute>} />
             <Route path="/orders" element={<AdminRoute><Orders /></AdminRoute>} />
             <Route path="/reviews" element={<AdminRoute><Reviews /></AdminRoute>} />

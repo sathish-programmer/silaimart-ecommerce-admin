@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import Logo from './Logo';
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -48,13 +49,13 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-8">
         <Link to="/" className="block group">
-          <div className="text-2xl font-black text-gray-900 tracking-tighter group-hover:text-primary-600 transition-colors">
-            SILAI<span className="text-primary-600 group-hover:text-gray-900 transition-colors">MART</span>
+          <div className="mb-1 group-hover:opacity-90 transition-opacity">
+            <Logo textClassName="text-3xl" iconClassName="w-8 h-8" />
           </div>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-2">
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-              {isSuperAdmin ? 'Divine Super Admin' : 'Divine Administrator'}
+              {isSuperAdmin ? 'System Admin' : 'Administrator'}
             </span>
           </div>
         </Link>
@@ -63,7 +64,7 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 px-4 pb-8 space-y-1 overflow-y-auto scrollbar-hide">
         <div className="px-4 py-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300 mb-2">Main Sanctuary</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300 mb-2">Main Menu</p>
         </div>
         {navigation.map((item) => {
           const isActive = location.pathname === item.href ||

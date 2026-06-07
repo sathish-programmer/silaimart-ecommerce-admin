@@ -14,6 +14,7 @@ const Banners = () => {
     title: '',
     subtitle: '',
     description: '',
+    offerTag: '',
     image: { url: '', alt: '' },
     link: { url: '', text: '', target: '_self' },
     position: 'shop-top',
@@ -21,7 +22,9 @@ const Banners = () => {
     isActive: true,
     backgroundColor: '#7c3aed',
     textColor: '#FFFFFF',
-    buttonColor: '#FFFFFF'
+    buttonColor: '#FFFFFF',
+    startDate: '',
+    endDate: ''
   });
 
   useEffect(() => {
@@ -107,6 +110,7 @@ const Banners = () => {
       title: '',
       subtitle: '',
       description: '',
+      offerTag: '',
       image: { url: '', alt: '' },
       link: { url: '', text: '', target: '_self' },
       position: 'shop-top',
@@ -114,7 +118,9 @@ const Banners = () => {
       isActive: true,
       backgroundColor: '#7c3aed',
       textColor: '#FFFFFF',
-      buttonColor: '#FFFFFF'
+      buttonColor: '#FFFFFF',
+      startDate: '',
+      endDate: ''
     });
     setEditBanner(null);
   };
@@ -125,7 +131,9 @@ const Banners = () => {
       setFormData({
         ...banner,
         image: banner.image || { url: '', alt: '' },
-        link: banner.link || { url: '', text: '', target: '_self' }
+        link: banner.link || { url: '', text: '', target: '_self' },
+        startDate: banner.startDate ? new Date(banner.startDate).toISOString().slice(0, 16) : '',
+        endDate: banner.endDate ? new Date(banner.endDate).toISOString().slice(0, 16) : ''
       });
     } else {
       resetForm();
@@ -229,7 +237,10 @@ const Banners = () => {
                 {banner.title}
               </h3>
               {banner.subtitle && (
-                <p className="text-sm font-bold text-gray-500 mb-4 tracking-tight line-clamp-1">{banner.subtitle}</p>
+                <p className="text-sm font-bold text-gray-500 mb-2 tracking-tight line-clamp-1">{banner.subtitle}</p>
+              )}
+              {banner.offerTag && (
+                <p className="inline-block px-2 py-1 bg-rose-100 text-rose-700 text-[10px] font-black uppercase tracking-widest rounded mb-4">{banner.offerTag}</p>
               )}
               {banner.description && (
                 <p className="text-xs font-medium text-gray-400 leading-relaxed mb-6 line-clamp-2">{banner.description}</p>
@@ -304,6 +315,16 @@ const Banners = () => {
                       className="input-premium py-4"
                     />
                   </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Sale Offer Tag</label>
+                    <input
+                      type="text"
+                      value={formData.offerTag}
+                      onChange={(e) => setFormData({ ...formData, offerTag: e.target.value })}
+                      placeholder="e.g. FLAT 50% OFF"
+                      className="input-premium py-4"
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Placement</label>
@@ -313,8 +334,12 @@ const Banners = () => {
                         className="input-premium py-4 font-bold"
                       >
                         <option value="shop-top">Shop Sanctuary</option>
-                        <option value="hero">Grand Hero</option>
+                        <option value="hero">Hero / Sale Offer Banner</option>
                         <option value="category">Category Flow</option>
+                        <option value="promo_tile">Promotional Grid Tile</option>
+                        <option value="story_banner">Story Banner</option>
+                        <option value="payment_strip">Payment Offer Strip</option>
+                        <option value="flash_sale">Flash Sale (with Timer)</option>
                       </select>
                     </div>
                     <div>
@@ -324,6 +349,26 @@ const Banners = () => {
                         value={formData.order}
                         onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
                         className="input-premium py-4 font-bold"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Start Date (Optional)</label>
+                      <input
+                        type="datetime-local"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className="input-premium py-4"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">End Date (Optional)</label>
+                      <input
+                        type="datetime-local"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        className="input-premium py-4"
                       />
                     </div>
                   </div>
@@ -368,11 +413,13 @@ const Banners = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">The Chronicle (Description)</label>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                  {formData.position === 'promo_tile' ? 'Badge Text (e.g. 🔥 MOST LOVED)' : 'The Chronicle (Description)'}
+                </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Tell the story of this promotion..."
+                  placeholder={formData.position === 'promo_tile' ? 'e.g. 🔥 MOST LOVED' : 'Tell the story of this promotion...'}
                   className="input-premium h-32 py-5 font-medium resize-none"
                 />
               </div>

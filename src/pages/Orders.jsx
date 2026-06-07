@@ -110,7 +110,7 @@ const Orders = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="section-title mb-1">Order Management</h1>
-          <p className="text-gray-500 font-medium">Monitor and process divine art acquisitions.</p>
+          <p className="text-gray-500 font-medium">Monitor and process customer orders.</p>
         </div>
         <div className="flex gap-3">
           <button onClick={fetchOrders} className="btn-outline flex items-center gap-2">
